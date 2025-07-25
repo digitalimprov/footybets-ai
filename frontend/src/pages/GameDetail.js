@@ -11,6 +11,7 @@ import {
 import { apiService } from '../services/apiService';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
+import SEO from '../components/SEO';
 
 const GameDetail = () => {
   const { gameId } = useParams();
@@ -80,151 +81,182 @@ const GameDetail = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            {game.home_team_name} vs {game.away_team_name}
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Round {game.round_number} • Season {game.season}
-          </p>
+    <>
+      <SEO 
+        title={game ? `${game.home_team_name} vs ${game.away_team_name}` : 'Game Details'}
+        description={game ? `AI prediction for ${game.home_team_name} vs ${game.away_team_name} - Round ${game.round_number}. Get betting tips, predicted scores, and expert analysis.` : 'Game prediction details'}
+        keywords={game ? [`${game.home_team_name}`, `${game.away_team_name}`, 'AFL betting', 'football prediction', 'sports betting tips'] : ['AFL betting', 'football prediction']}
+        url={`/games/${gameId}`}
+        type="article"
+        publishedTime={game?.game_date}
+        structuredData={game ? {
+          "@context": "https://schema.org",
+          "@type": "SportsEvent",
+          "name": `${game.home_team_name} vs ${game.away_team_name}`,
+          "description": `AFL Round ${game.round_number} game between ${game.home_team_name} and ${game.away_team_name}`,
+          "startDate": game.game_date,
+          "location": {
+            "@type": "Place",
+            "name": game.venue
+          },
+          "competitor": [
+            {
+              "@type": "SportsTeam",
+              "name": game.home_team_name
+            },
+            {
+              "@type": "SportsTeam", 
+              "name": game.away_team_name
+            }
+          ]
+        } : null}
+      />
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {game.home_team_name} vs {game.away_team_name}
+            </h1>
+            <p className="text-gray-600 mt-2">
+              Round {game.round_number} • Season {game.season}
+            </p>
+          </div>
+          <Link to="/games" className="btn-secondary">
+            Back to Games
+          </Link>
         </div>
-        <Link to="/games" className="btn-secondary">
-          Back to Games
-        </Link>
-      </div>
 
-      {/* Game Details */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Game Info */}
-        <div className="lg:col-span-2">
-          <div className="card">
-            <h2 className="text-xl font-semibold mb-4">Game Information</h2>
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <CalendarIcon className="w-5 h-5 text-gray-400 mr-3" />
-                <span className="text-gray-600">
-                  {format(new Date(game.game_date), 'EEEE, MMMM d, yyyy')}
-                </span>
-              </div>
-              <div className="flex items-center">
-                <ClockIcon className="w-5 h-5 text-gray-400 mr-3" />
-                <span className="text-gray-600">
-                  {format(new Date(game.game_date), 'h:mm a')}
-                </span>
-              </div>
-              <div className="flex items-center">
-                <MapPinIcon className="w-5 h-5 text-gray-400 mr-3" />
-                <span className="text-gray-600">{game.venue}</span>
-              </div>
-              {game.is_finished && (
+        {/* Game Details */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Game Info */}
+          <div className="lg:col-span-2">
+            <div className="card">
+              <h2 className="text-xl font-semibold mb-4">Game Information</h2>
+              <div className="space-y-4">
                 <div className="flex items-center">
-                  <TrophyIcon className="w-5 h-5 text-gray-400 mr-3" />
+                  <CalendarIcon className="w-5 h-5 text-gray-400 mr-3" />
                   <span className="text-gray-600">
-                    Final Score: {game.home_score} - {game.away_score}
+                    {format(new Date(game.game_date), 'EEEE, MMMM d, yyyy')}
                   </span>
+                </div>
+                <div className="flex items-center">
+                  <ClockIcon className="w-5 h-5 text-gray-400 mr-3" />
+                  <span className="text-gray-600">
+                    {format(new Date(game.game_date), 'h:mm a')}
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <MapPinIcon className="w-5 h-5 text-gray-400 mr-3" />
+                  <span className="text-gray-600">{game.venue}</span>
+                </div>
+                {game.is_finished && (
+                  <div className="flex items-center">
+                    <TrophyIcon className="w-5 h-5 text-gray-400 mr-3" />
+                    <span className="text-gray-600">
+                      Final Score: {game.home_score} - {game.away_score}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* AI Prediction */}
+          <div className="lg:col-span-1">
+            <div className="card">
+              <h2 className="text-xl font-semibold mb-4 flex items-center">
+                <ChartBarIcon className="w-5 h-5 mr-2" />
+                AI Prediction
+              </h2>
+              
+              {prediction ? (
+                <div className="space-y-4">
+                  {/* Predicted Winner */}
+                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-600 mb-2">Predicted Winner</p>
+                    <p className="text-lg font-semibold text-gray-900">
+                      {prediction.predicted_winner_name}
+                    </p>
+                  </div>
+
+                  {/* Confidence Score */}
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600 mb-2">Confidence</p>
+                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getConfidenceColor(prediction.confidence_score)}`}>
+                      <ArrowTrendingUpIcon className="w-4 h-4 mr-1" />
+                      {(prediction.confidence_score * 100).toFixed(1)}%
+                    </div>
+                  </div>
+
+                  {/* Predicted Score */}
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <p className="text-sm text-gray-600 mb-2">Predicted Score</p>
+                    <p className="text-xl font-bold text-gray-900">
+                      {prediction.predicted_home_score} - {prediction.predicted_away_score}
+                    </p>
+                  </div>
+
+                  {/* Betting Recommendation */}
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600 mb-2">Betting Tip</p>
+                    <div className={`inline-flex items-center px-3 py-2 rounded-lg border ${getBetRecommendationColor(prediction.recommended_bet)}`}>
+                      <span className="font-medium capitalize">
+                        {prediction.recommended_bet === 'home' ? game.home_team_name : 
+                         prediction.recommended_bet === 'away' ? game.away_team_name : 
+                         prediction.recommended_bet}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {(prediction.bet_confidence * 100).toFixed(1)}% confidence
+                    </p>
+                  </div>
+
+                  {/* AI Reasoning */}
+                  <div className="mt-4">
+                    <p className="text-sm font-medium text-gray-700 mb-2">AI Reasoning</p>
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      {prediction.reasoning}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">No AI prediction available yet</p>
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* AI Prediction */}
-        <div className="lg:col-span-1">
+        {/* Factors Considered */}
+        {prediction && prediction.factors_considered && (
           <div className="card">
-            <h2 className="text-xl font-semibold mb-4 flex items-center">
-              <ChartBarIcon className="w-5 h-5 mr-2" />
-              AI Prediction
-            </h2>
-            
-            {prediction ? (
-              <div className="space-y-4">
-                {/* Predicted Winner */}
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-2">Predicted Winner</p>
-                  <p className="text-lg font-semibold text-gray-900">
-                    {prediction.predicted_winner_name}
-                  </p>
+            <h2 className="text-xl font-semibold mb-4">Factors Considered</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {prediction.factors_considered.map((factor, index) => (
+                <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                  <span className="text-gray-700">{factor}</span>
                 </div>
-
-                {/* Confidence Score */}
-                <div className="text-center">
-                  <p className="text-sm text-gray-600 mb-2">Confidence</p>
-                  <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getConfidenceColor(prediction.confidence_score)}`}>
-                    <ArrowTrendingUpIcon className="w-4 h-4 mr-1" />
-                    {(prediction.confidence_score * 100).toFixed(1)}%
-                  </div>
-                </div>
-
-                {/* Predicted Score */}
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-2">Predicted Score</p>
-                  <p className="text-xl font-bold text-gray-900">
-                    {prediction.predicted_home_score} - {prediction.predicted_away_score}
-                  </p>
-                </div>
-
-                {/* Betting Recommendation */}
-                <div className="text-center">
-                  <p className="text-sm text-gray-600 mb-2">Betting Tip</p>
-                  <div className={`inline-flex items-center px-3 py-2 rounded-lg border ${getBetRecommendationColor(prediction.recommended_bet)}`}>
-                    <span className="font-medium capitalize">
-                      {prediction.recommended_bet === 'home' ? game.home_team_name : 
-                       prediction.recommended_bet === 'away' ? game.away_team_name : 
-                       prediction.recommended_bet}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {(prediction.bet_confidence * 100).toFixed(1)}% confidence
-                  </p>
-                </div>
-
-                {/* AI Reasoning */}
-                <div className="mt-4">
-                  <p className="text-sm font-medium text-gray-700 mb-2">AI Reasoning</p>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    {prediction.reasoning}
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-500">No AI prediction available yet</p>
-              </div>
-            )}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Odds Analysis */}
+        {prediction && prediction.odds_analysis && (
+          <div className="card">
+            <h2 className="text-xl font-semibold mb-4">Odds Analysis</h2>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <pre className="text-sm text-gray-700 whitespace-pre-wrap">
+                {prediction.odds_analysis}
+              </pre>
+            </div>
+          </div>
+        )}
       </div>
-
-      {/* Factors Considered */}
-      {prediction && prediction.factors_considered && (
-        <div className="card">
-          <h2 className="text-xl font-semibold mb-4">Factors Considered</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {prediction.factors_considered.map((factor, index) => (
-              <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                <span className="text-gray-700">{factor}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Odds Analysis */}
-      {prediction && prediction.odds_analysis && (
-        <div className="card">
-          <h2 className="text-xl font-semibold mb-4">Odds Analysis</h2>
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <pre className="text-sm text-gray-700 whitespace-pre-wrap">
-              {prediction.odds_analysis}
-            </pre>
-          </div>
-        </div>
-      )}
-    </div>
+    </>
   );
 };
 

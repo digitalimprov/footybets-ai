@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+# Disallow admin and private pages
+Disallow: /login
+Disallow: /scraping
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /static/
+
+# Allow important pages
+Allow: /
+Allow: /tips
+Allow: /predictions
+Allow: /analytics
+Allow: /games
+
+# Sitemap location
+Sitemap: https://footybets.ai/sitemap.xml 
