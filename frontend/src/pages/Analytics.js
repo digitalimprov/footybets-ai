@@ -221,7 +221,7 @@ const Analytics = () => {
                   <span className="text-sm font-medium text-gray-600">Winning Bets</span>
                   <span className="text-sm font-bold text-green-600">{analytics.winning_bets}</span>
                 </div>
-                              <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-gray-600">Win Rate</span>
                   <span className="text-sm font-bold text-blue-600">
                     {analytics.total_bets_recommended > 0
@@ -229,11 +229,12 @@ const Analytics = () => {
                       : 0}%
                   </span>
                 </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-600">ROI</span>
-                <span className={`text-sm font-bold ${analytics.betting_roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {analytics.betting_roi.toFixed(1)}%
-                </span>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-600">ROI</span>
+                  <span className={`text-sm font-bold ${analytics.betting_roi >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {analytics.betting_roi.toFixed(1)}%
+                  </span>
+                </div>
               </div>
             </div>
           </div>
