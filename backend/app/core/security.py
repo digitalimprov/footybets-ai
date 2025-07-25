@@ -45,7 +45,20 @@ class SecurityManager:
     """Centralized security management for the application."""
     
     def __init__(self):
-        self.encryption_key = Fernet.generate_key() if not hasattr(settings, 'encryption_key') else settings.encryption_key
+        # Generate a proper Fernet key if not provided
+        if not hasattr(settings, 'encryption_key') or not settings.encryption_key:
+            self.encryption_key = Fernet.generate_key()
+        else:
+            # Ensure the key is properly formatted for Fernet
+            try:
+                # Try to use the existing key
+                self.encryption_key = settings.encryption_key.encode() if isinstance(settings.encryption_key, str) else settings.encryption_key
+                # Test if it's valid by creating a Fernet instance
+                Fernet(self.encryption_key)
+            except (ValueError, TypeError):
+                # If invalid, generate a new one
+                self.encryption_key = Fernet.generate_key()
+        
         self.cipher_suite = Fernet(self.encryption_key)
         
         # Rate limiting storage (in production, use Redis)

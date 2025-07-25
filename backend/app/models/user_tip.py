@@ -7,6 +7,7 @@ class UserTip(Base):
     __tablename__ = "user_tips"
     
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
     game_id = Column(Integer, ForeignKey("games.id"), index=True)
     
     # User information (simplified for now)
@@ -26,8 +27,9 @@ class UserTip(Base):
     is_correct = Column(Boolean, nullable=True)  # Set after game completion
     
     # Relationships
-    game = relationship("Game")
-    predicted_winner = relationship("Team")
+    user = relationship("User", back_populates="user_tips", lazy="joined")
+    game = relationship("Game", lazy="joined")
+    predicted_winner = relationship("Team", lazy="joined")
     
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow) 

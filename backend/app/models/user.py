@@ -6,7 +6,6 @@ from typing import List, Dict, Any
 import json
 
 from app.core.database import Base
-from app.core.security import security_manager
 
 # Define role permissions
 ROLE_PERMISSIONS = {
@@ -163,6 +162,7 @@ class User(Base):
 
     def set_password(self, password: str):
         """Set user password with validation."""
+        from app.core.security import security_manager
         # Validate password strength
         validation = security_manager.validate_password_strength(password)
         if not validation["valid"]:
@@ -175,10 +175,12 @@ class User(Base):
 
     def verify_password(self, password: str) -> bool:
         """Verify user password."""
+        from app.core.security import security_manager
         return security_manager.verify_password(password, self.hashed_password)
 
     def generate_api_key(self) -> str:
         """Generate a new API key for the user."""
+        from app.core.security import security_manager
         api_key = security_manager.generate_api_key()
         self.api_key_hash = security_manager.hash_api_key(api_key)
         self.api_key_created = datetime.utcnow()
@@ -186,6 +188,7 @@ class User(Base):
 
     def verify_api_key(self, api_key: str) -> bool:
         """Verify an API key."""
+        from app.core.security import security_manager
         if not self.api_key_hash:
             return False
         
@@ -205,23 +208,27 @@ class User(Base):
 
     def add_role(self, role: str):
         """Add a role to the user and update permissions."""
+        from app.core.security import security_manager
         if role not in self.roles:
             self.roles.append(role)
             self._update_permissions()
 
     def remove_role(self, role: str):
         """Remove a role from the user and update permissions."""
+        from app.core.security import security_manager
         if role in self.roles:
             self.roles.remove(role)
             self._update_permissions()
 
     def set_roles(self, roles: List[str]):
         """Set user roles and update permissions."""
+        from app.core.security import security_manager
         self.roles = roles
         self._update_permissions()
 
     def _update_permissions(self):
         """Update user permissions based on their roles."""
+        from app.core.security import security_manager
         permissions = set()
         
         # Add permissions for each role
@@ -240,16 +247,19 @@ class User(Base):
 
     def add_permission(self, permission: str):
         """Add a permission to the user."""
+        from app.core.security import security_manager
         if permission not in self.permissions:
             self.permissions.append(permission)
 
     def remove_permission(self, permission: str):
         """Remove a permission from the user."""
+        from app.core.security import security_manager
         if permission in self.permissions:
             self.permissions.remove(permission)
 
     def promote_to_admin(self):
         """Promote user to admin role."""
+        from app.core.security import security_manager
         self.is_admin = True
         self.add_role("admin")
         self.subscription_tier = "admin"
@@ -257,6 +267,7 @@ class User(Base):
 
     def demote_from_admin(self):
         """Demote user from admin role."""
+        from app.core.security import security_manager
         self.is_admin = False
         self.remove_role("admin")
         self.subscription_tier = "free"
@@ -264,6 +275,7 @@ class User(Base):
 
     def upgrade_subscription(self, tier: str, duration_days: int = 30):
         """Upgrade user subscription."""
+        from app.core.security import security_manager
         valid_tiers = ["basic", "premium", "pro"]
         if tier not in valid_tiers:
             raise ValueError(f"Invalid subscription tier. Must be one of: {valid_tiers}")
@@ -277,44 +289,52 @@ class User(Base):
 
     def downgrade_subscription(self):
         """Downgrade user to free tier."""
+        from app.core.security import security_manager
         self.subscription_tier = "free"
         self.subscription_expires = None
         self.remove_role("subscriber")
 
     def lock_account(self, minutes: int = 15):
         """Lock the account for a specified number of minutes."""
+        from app.core.security import security_manager
         self.account_locked_until = datetime.utcnow() + timedelta(minutes=minutes)
 
     def unlock_account(self):
         """Unlock the account."""
+        from app.core.security import security_manager
         self.account_locked_until = None
         self.failed_login_attempts = 0
 
     def record_failed_login(self):
         """Record a failed login attempt."""
+        from app.core.security import security_manager
         self.failed_login_attempts += 1
         if self.failed_login_attempts >= 5:
             self.lock_account()
 
     def record_successful_login(self):
         """Record a successful login."""
+        from app.core.security import security_manager
         self.last_login = datetime.utcnow()
         self.failed_login_attempts = 0
         self.account_locked_until = None
 
     def generate_verification_token(self) -> str:
         """Generate email verification token."""
+        from app.core.security import security_manager
         self.email_verification_token = security_manager.generate_secure_token()
         return self.email_verification_token
 
     def generate_password_reset_token(self) -> str:
         """Generate password reset token."""
+        from app.core.security import security_manager
         self.password_reset_token = security_manager.generate_secure_token()
         self.password_reset_expires = datetime.utcnow() + timedelta(hours=24)
         return self.password_reset_token
 
     def verify_password_reset_token(self, token: str) -> bool:
         """Verify password reset token."""
+        from app.core.security import security_manager
         if not self.password_reset_token or not self.password_reset_expires:
             return False
         
@@ -325,11 +345,13 @@ class User(Base):
 
     def clear_password_reset_token(self):
         """Clear password reset token."""
+        from app.core.security import security_manager
         self.password_reset_token = None
         self.password_reset_expires = None
 
     def to_dict(self, include_sensitive: bool = False) -> Dict[str, Any]:
         """Convert user to dictionary, optionally including sensitive data."""
+        from app.core.security import security_manager
         data = {
             "id": self.id,
             "email": self.email,

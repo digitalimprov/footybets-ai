@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2020 Brownlow Medal Predictor Round 8 | Footy Bets AI</title>
+    <meta name="description" content="Round 8 Brownlow Medal predictor analysis for 2020. AI-powered Brownlow vote predictions for each game.">
+    <meta name="keywords" content="Brownlow Medal, Brownlow Medal Predictor, AFL, Australian Football, player statistics, predictions, AI analysis, football betting, Brownlow votes, AFL betting">
+    <meta property="og:title" content="2020 Brownlow Medal Predictor Round 8 | Footy Bets AI">
+    <meta property="og:description" content="Round 8 Brownlow Medal predictor analysis for 2020. AI-powered Brownlow vote predictions for each game.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://footybets.ai/brownlow-medal-predictions/2020/round-8">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="2020 Brownlow Medal Predictor Round 8 | Footy Bets AI">
+    <meta name="twitter:description" content="Round 8 Brownlow Medal predictor analysis for 2020. AI-powered Brownlow vote predictions for each game.">
+    <link rel="canonical" href="https://footybets.ai/brownlow-medal-predictions/2020/round-8">
+    
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #7f8c8d;
+        }
+        .brownlow-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .brownlow-table th, .brownlow-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .brownlow-table th {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        .brownlow-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .brownlow-table tr:hover {
+            background-color: #e8f4fd;
+        }
+        .vote-3 { background-color: #ffd700; font-weight: bold; }
+        .vote-2 { background-color: #c0c0c0; font-weight: bold; }
+        .vote-1 { background-color: #cd7f32; font-weight: bold; }
+        .game-result {
+            background: #ecf0f1;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .stat-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .round-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .round-nav-button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .round-nav-button:hover {
+            background-color: #2980b9;
+            text-decoration: none;
+        }
+        .round-nav-button.disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .breadcrumb {
+            background-color: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .breadcrumb a {
+            color: #3498db;
+        }
+        .disclaimer {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-style: italic;
+        }
+        .stat-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .stat-label {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+        .winner {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+    <div class="breadcrumb">
+        <a href="/brownlow-medal-predictions">Brownlow Medal Predictor</a> > 
+        <a href="brownlow-2020.html">2020 Season</a> > 
+        Round 8
+    </div>
+    
+    <h1>2020 Brownlow Medal Predictor Round 8</h1>
+    
+    <div class="disclaimer">
+        <strong>📝 Important Note:</strong> These predictions were generated using AI analysis of historical data and were not made before Round 8 was played. They are used to train and validate our AI prediction models for future seasons.
+    </div>
+    
+    <div class="round-navigation"><a href="brownlow-2020-round-7.html" class="round-nav-button">← Round 7</a><span><strong>Round 8</strong></span><a href="brownlow-2020-round-9.html" class="round-nav-button">Round 9 →</a></div>
+    
+    <p>Round 8 of 2020 – this is where the Brownlow race really heats up. Our AI has crunched the numbers and here's who it reckons got the umpires' attention this week.</p>
+    
+    <h2>🎮 Round 8 – Who Got The Votes?</h2>
+    
+        <div class="game-result">
+            <h3>Gold Coast 46 - 51 Western Bulldogs</h3>
+            
+            <h4>🏆 The Votes – Who Got The Chocolates?</h4>
+            <table class="brownlow-table">
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Player</th>
+                        <th>Team</th>
+                        <th>Votes</th>
+                        <th>Reasoning</th>
+                    </tr>
+                </thead>
+                <tbody>
+        
+                <tr class="vote-3">
+                    <td>1</td>
+                    <td>Alex Sexton</td>
+                    <td>Gold Coast</td>
+                    <td><strong>3</strong></td>
+                    <td>Three goals is a significant contribution, even in a losing effort.  His inside 50s and disposals also support this.</td>
+                </tr>
+            
+                <tr class="vote-2">
+                    <td>2</td>
+                    <td>Jack Macrae</td>
+                    <td>Western Bulldogs</td>
+                    <td><strong>2</strong></td>
+                    <td>High disposal count, clearances, and tackles show strong midfield performance in a winning effort. His inside 50s also add value.</td>
+                </tr>
+            
+                <tr class="vote-1">
+                    <td>3</td>
+                    <td>Touk Miller</td>
+                    <td>Gold Coast</td>
+                    <td><strong>1</strong></td>
+                    <td>High contested possessions, clearances, and tackles demonstrate a strong effort despite the loss.  His high disposal count nearly gets him more votes.</td>
+                </tr>
+            
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="game-result">
+            <h3>Greater Western Sydney 62 - 50 Richmond</h3>
+            
+            <h4>🏆 The Votes – Who Got The Chocolates?</h4>
+            <table class="brownlow-table">
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Player</th>
+                        <th>Team</th>
+                        <th>Votes</th>
+                        <th>Reasoning</th>
+                    </tr>
+                </thead>
+                <tbody>
+        
+                <tr class="vote-3">
+                    <td>1</td>
+                    <td>Toby Greene</td>
+                    <td>Greater Western Sydney</td>
+                    <td><strong>3</strong></td>
+                    <td>5 goals is a match-winning performance and almost guarantees 3 votes.</td>
+                </tr>
+            
+                <tr class="vote-2">
+                    <td>2</td>
+                    <td>Josh Kelly</td>
+                    <td>Greater Western Sydney</td>
+                    <td><strong>2</strong></td>
+                    <td>High disposal count (26), 8 clearances, 8 tackles, and a goal show elite midfield dominance and defensive work rate in a winning team.</td>
+                </tr>
+            
+                <tr class="vote-1">
+                    <td>3</td>
+                    <td>Dustin Martin</td>
+                    <td>Richmond</td>
+                    <td><strong>1</strong></td>
+                    <td>2 goals, high disposal count (23), and 9 clearances despite the loss; shows individual brilliance.</td>
+                </tr>
+            
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="game-result">
+            <h3>North Melbourne 57 - 64 Carlton</h3>
+            
+            <h4>🏆 The Votes – Who Got The Chocolates?</h4>
+            <table class="brownlow-table">
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Player</th>
+                        <th>Team</th>
+                        <th>Votes</th>
+                        <th>Reasoning</th>
+                    </tr>
+                </thead>
+                <tbody>
+        
+                <tr class="vote-3">
+                    <td>1</td>
+                    <td>Bailey Scott</td>
+                    <td>North Melbourne</td>
+                    <td><strong>3</strong></td>
+                    <td>3 goals is a standout performance, despite North Melbourne losing.</td>
+                </tr>
+            
+                <tr class="vote-2">
+                    <td>2</td>
+                    <td>Jared Polec</td>
+                    <td>North Melbourne</td>
+                    <td><strong>2</strong></td>
+                    <td>High disposal count, goal, and good contribution across the board for a losing team.</td>
+                </tr>
+            
+                <tr class="vote-1">
+                    <td>3</td>
+                    <td>Sam Walsh</td>
+                    <td>Carlton</td>
+                    <td><strong>1</strong></td>
+                    <td>Strong game from Walsh for the winning team; high disposals, goal and tackles.  Other Carlton players had slightly better overall impact given the win.</td>
+                </tr>
+            
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="game-result">
+            <h3>Sydney 60 - 53 Hawthorn</h3>
+            
+            <h4>🏆 The Votes – Who Got The Chocolates?</h4>
+            <table class="brownlow-table">
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Player</th>
+                        <th>Team</th>
+                        <th>Votes</th>
+                        <th>Reasoning</th>
+                    </tr>
+                </thead>
+                <tbody>
+        
+                <tr class="vote-3">
+                    <td>1</td>
+                    <td>Tom Papley</td>
+                    <td>Sydney</td>
+                    <td><strong>3</strong></td>
+                    <td>4 goals is a massive Brownlow vote earner.  Despite not having high disposals, his impact on the scoreboard for the winning team is undeniable.</td>
+                </tr>
+            
+                <tr class="vote-2">
+                    <td>2</td>
+                    <td>Luke Parker</td>
+                    <td>Sydney</td>
+                    <td><strong>2</strong></td>
+                    <td>A goal, solid disposal numbers, high contested possessions, clearances and tackles, shows a well-rounded midfield performance for the winning side.</td>
+                </tr>
+            
+                <tr class="vote-1">
+                    <td>3</td>
+                    <td>Jaeger O'Meara</td>
+                    <td>Hawthorn</td>
+                    <td><strong>1</strong></td>
+                    <td>Despite Hawthorn losing, O'Meara's 9 clearances, a goal, and high disposal count, coupled with strong tackling, makes him the best Hawthorn contender. His high disposal efficiency also helps his case.</td>
+                </tr>
+            
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="game-result">
+            <h3>Port Adelaide 44 - 73 St Kilda</h3>
+            
+            <h4>🏆 The Votes – Who Got The Chocolates?</h4>
+            <table class="brownlow-table">
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Player</th>
+                        <th>Team</th>
+                        <th>Votes</th>
+                        <th>Reasoning</th>
+                    </tr>
+                </thead>
+                <tbody>
+        
+                <tr class="vote-3">
+                    <td>1</td>
+                    <td>Rowan Marshall</td>
+                    <td>St Kilda</td>
+                    <td><strong>3</strong></td>
+                    <td>2 goals, 7 clearances, 13 contested possessions, 5 inside 50s and strong tackling (5) demonstrates significant midfield dominance and forward impact in a winning team.</td>
+                </tr>
+            
+                <tr class="vote-2">
+                    <td>2</td>
+                    <td>Jack Steele</td>
+                    <td>St Kilda</td>
+                    <td><strong>2</strong></td>
+                    <td>High disposal count (21), 4 clearances, 10 contested possessions, 6 tackles, and 3 inside 50s show consistent contribution across the game for the winning team.</td>
+                </tr>
+            
+                <tr class="vote-1">
+                    <td>3</td>
+                    <td>Jade Gresham</td>
+                    <td>St Kilda</td>
+                    <td><strong>1</strong></td>
+                    <td>A goal, 5 clearances, 9 contested possessions, and 4 inside 50s contribute to the winning team's midfield strength.  His high disposal count (23) further supports this.</td>
+                </tr>
+            
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="game-result">
+            <h3>Adelaide 59 - 62 Essendon</h3>
+            
+            <h4>🏆 The Votes – Who Got The Chocolates?</h4>
+            <table class="brownlow-table">
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Player</th>
+                        <th>Team</th>
+                        <th>Votes</th>
+                        <th>Reasoning</th>
+                    </tr>
+                </thead>
+                <tbody>
+        
+                <tr class="vote-3">
+                    <td>1</td>
+                    <td>Andrew McGrath</td>
+                    <td>Essendon</td>
+                    <td><strong>3</strong></td>
+                    <td>High disposal count (25), exceptional tackle count (10), and significant clearance work (8) in a winning team.  Midfield dominance is clear.</td>
+                </tr>
+            
+                <tr class="vote-2">
+                    <td>2</td>
+                    <td>Zach Merrett</td>
+                    <td>Essendon</td>
+                    <td><strong>2</strong></td>
+                    <td>Game-high disposals (33), strong clearance numbers (6) and high marks (9) for a winning team.  His influence was substantial.</td>
+                </tr>
+            
+                <tr class="vote-1">
+                    <td>3</td>
+                    <td>Anthony McDonald-Tipungwuti</td>
+                    <td>Essendon</td>
+                    <td><strong>1</strong></td>
+                    <td>Two goals and a solid contested possession count (10) for a winning team elevates him above other Essendon players with less impact.</td>
+                </tr>
+            
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="game-result">
+            <h3>West Coast 111 - 45 Collingwood</h3>
+            
+            <h4>🏆 The Votes – Who Got The Chocolates?</h4>
+            <table class="brownlow-table">
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Player</th>
+                        <th>Team</th>
+                        <th>Votes</th>
+                        <th>Reasoning</th>
+                    </tr>
+                </thead>
+                <tbody>
+        
+                <tr class="vote-3">
+                    <td>1</td>
+                    <td>Josh Kennedy</td>
+                    <td>West Coast</td>
+                    <td><strong>3</strong></td>
+                    <td>7 goals is a phenomenal return and easily secures 3 votes.  Dominant performance in the forward line.</td>
+                </tr>
+            
+                <tr class="vote-2">
+                    <td>2</td>
+                    <td>Tim Kelly</td>
+                    <td>West Coast</td>
+                    <td><strong>2</strong></td>
+                    <td>High disposal count (29), significant clearances (6), and inside 50s (6) show midfield influence and impact. One goal contributes to the score.</td>
+                </tr>
+            
+                <tr class="vote-1">
+                    <td>3</td>
+                    <td>Andrew Gaff</td>
+                    <td>West Coast</td>
+                    <td><strong>1</strong></td>
+                    <td>Solid game with high disposals (26), tackles (4), and a goal. High mark count (11) displays his influence but others had more game-changing impact.</td>
+                </tr>
+            
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="game-result">
+            <h3>Melbourne 49 - 53 Brisbane Lions</h3>
+            
+            <h4>🏆 The Votes – Who Got The Chocolates?</h4>
+            <table class="brownlow-table">
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Player</th>
+                        <th>Team</th>
+                        <th>Votes</th>
+                        <th>Reasoning</th>
+                    </tr>
+                </thead>
+                <tbody>
+        
+                <tr class="vote-3">
+                    <td>1</td>
+                    <td>Lachie Neale</td>
+                    <td>Brisbane Lions</td>
+                    <td><strong>3</strong></td>
+                    <td>Game-high 33 disposals, 7 clearances, 7 inside 50s, and strong contested possession count (16) demonstrate clear midfield dominance in a winning team.</td>
+                </tr>
+            
+                <tr class="vote-2">
+                    <td>2</td>
+                    <td>Clayton Oliver</td>
+                    <td>Melbourne</td>
+                    <td><strong>2</strong></td>
+                    <td>High disposal count (28), 10 tackles, and 5 clearances showcase exceptional work rate and midfield influence despite the loss.  His 17 contested possessions were key.</td>
+                </tr>
+            
+                <tr class="vote-1">
+                    <td>3</td>
+                    <td>Jarryd Lyons</td>
+                    <td>Brisbane Lions</td>
+                    <td><strong>1</strong></td>
+                    <td>Solid all-around game with 22 disposals, 9 tackles, and 2 clearances.  Contributed significantly to Brisbane's win.</td>
+                </tr>
+            
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="game-result">
+            <h3>Fremantle 16 - 48 Geelong</h3>
+            
+            <h4>🏆 The Votes – Who Got The Chocolates?</h4>
+            <table class="brownlow-table">
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Player</th>
+                        <th>Team</th>
+                        <th>Votes</th>
+                        <th>Reasoning</th>
+                    </tr>
+                </thead>
+                <tbody>
+        
+                <tr class="vote-3">
+                    <td>1</td>
+                    <td>Tom Hawkins</td>
+                    <td>Geelong</td>
+                    <td><strong>3</strong></td>
+                    <td>3 goals is a standout performance, especially given Geelong's win.</td>
+                </tr>
+            
+                <tr class="vote-2">
+                    <td>2</td>
+                    <td>Cameron Guthrie</td>
+                    <td>Geelong</td>
+                    <td><strong>2</strong></td>
+                    <td>High disposal count (30) combined with strong clearances (7) and tackles (6) shows significant midfield influence in a winning team.</td>
+                </tr>
+            
+                <tr class="vote-1">
+                    <td>3</td>
+                    <td>Mitch Duncan</td>
+                    <td>Geelong</td>
+                    <td><strong>1</strong></td>
+                    <td>A goal and solid all-around game (26 disposals, 7 tackles) for the winning side.</td>
+                </tr>
+            
+                </tbody>
+            </table>
+        </div>
+        
+    <h2>📊 Round 8 Wrap</h2>
+    <p>That's 9 games down for Round 8. Some blokes made their case for the Brownlow, others might want to forget this week ever happened. That's footy.</p>
+    
+    <p><a href="brownlow-2020.html">← Back to 2020 Season Overview</a></p>
+    
+        
+        <div class="footer">
+            <p>© 2025 Footy Bets AI - AI-Powered AFL Analysis</p>
+            <p>Generated on July 25, 2025 at 10:25 PM</p>
+        </div>
+    </div>
+</body>
+</html>

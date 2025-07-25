@@ -4,10 +4,10 @@ import secrets
 
 class Settings(BaseSettings):
     # Database
-    database_url: str = "postgresql://user:password@localhost:5432/footybets"
+    database_url: str = "sqlite:///./footybets.db"
 
     # Google Gemini API
-    gemini_api_key: str
+    gemini_api_key: Optional[str] = None
 
     # Scraping settings
     scraping_delay: int = 1

@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class AFLPredictor:
     def __init__(self):
         genai.configure(api_key=settings.gemini_api_key)
-        self.model = genai.GenerativeModel('gemini-pro')
+        self.model = genai.GenerativeModel('gemini-1.5-flash')
         self.model_version = "1.0.0"
         
     def generate_predictions(self, db: Session, upcoming_games: List[Game]) -> List[Prediction]:

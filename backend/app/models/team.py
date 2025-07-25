@@ -18,4 +18,5 @@ class Team(Base):
     
     # Relationships
     home_games = relationship("Game", foreign_keys="Game.home_team_id", back_populates="home_team")
-    away_games = relationship("Game", foreign_keys="Game.away_team_id", back_populates="away_team") 
+    away_games = relationship("Game", foreign_keys="Game.away_team_id", back_populates="away_team")
+    players = relationship("Player", back_populates="current_team") 
