@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useParams, useLocation } from 'react-router-dom';
 import { 
   CalendarIcon, 
@@ -20,13 +20,8 @@ const Tips = () => {
   const [loading, setLoading] = useState(true);
   const [selectedRound, setSelectedRound] = useState(null);
   const [rounds, setRounds] = useState([]);
-  const [currentSeason] = useState(new Date().getFullYear());
 
-  useEffect(() => {
-    loadPredictions();
-  }, [roundNumber, season, teamSlug]);
-
-  const loadPredictions = async () => {
+  const loadPredictions = useCallback(async () => {
     try {
       setLoading(true);
       const data = await apiService.getPredictions(100); // Get more predictions
@@ -48,7 +43,11 @@ const Tips = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [roundNumber]);
+
+  useEffect(() => {
+    loadPredictions();
+  }, [loadPredictions]);
 
   const getConfidenceColor = (confidence) => {
     if (confidence > 0.8) return 'text-green-600 bg-green-100';
