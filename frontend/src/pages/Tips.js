@@ -11,7 +11,7 @@ import { apiService } from '../services/apiService';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import SEO from '../components/SEO';
-import { urlStructure, generateGameUrl, generateSEOTitle, generateSEODescription } from '../utils/urlStructure';
+import { urlStructure, generateGameUrl } from '../utils/urlStructure';
 
 const Tips = () => {
   const { roundNumber, season, teamSlug } = useParams();
