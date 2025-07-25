@@ -1,0 +1,138 @@
+#!/bin/bash
+
+# FootyBets.ai Cloudflare DNS Configuration Script
+# This script helps you configure Cloudflare DNS to point to your Google Cloud Run services
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Configuration
+DOMAIN="footybets.ai"
+BACKEND_URL="https://footybets-backend-818397187963.us-central1.run.app"
+FRONTEND_URL="https://footybets-frontend-818397187963.us-central1.run.app"
+
+echo -e "${BLUE}🌐 FootyBets.ai Cloudflare DNS Configuration${NC}"
+echo "=================================================="
+
+echo -e "${BLUE}📋 Current Service URLs:${NC}"
+echo -e "  Backend: ${GREEN}$BACKEND_URL${NC}"
+echo -e "  Frontend: ${GREEN}$FRONTEND_URL${NC}"
+echo ""
+
+echo -e "${BLUE}🔧 Cloudflare DNS Configuration Steps:${NC}"
+echo "=================================================="
+echo ""
+echo -e "${YELLOW}1. Log into Cloudflare Dashboard${NC}"
+echo "   • Go to: https://dash.cloudflare.com"
+echo "   • Select your domain: $DOMAIN"
+echo ""
+echo -e "${YELLOW}2. Go to DNS Settings${NC}"
+echo "   • Click on 'DNS' in the left sidebar"
+echo "   • Click on 'Records' tab"
+echo ""
+echo -e "${YELLOW}3. Configure DNS Records${NC}"
+echo "   Add the following records:"
+echo ""
+echo -e "${GREEN}📝 Main Website (Apex Domain):${NC}"
+echo "   Type: CNAME"
+echo "   Name: @"
+echo "   Target: $FRONTEND_URL"
+echo "   Proxy status: Proxied (Orange cloud)"
+echo "   TTL: Auto"
+echo ""
+echo -e "${GREEN}📝 API Subdomain:${NC}"
+echo "   Type: CNAME"
+echo "   Name: api"
+echo "   Target: $BACKEND_URL"
+echo "   Proxy status: Proxied (Orange cloud)"
+echo "   TTL: Auto"
+echo ""
+echo -e "${GREEN}📝 www Subdomain:${NC}"
+echo "   Type: CNAME"
+echo "   Name: www"
+echo "   Target: $FRONTEND_URL"
+echo "   Proxy status: Proxied (Orange cloud)"
+echo "   TTL: Auto"
+echo ""
+echo -e "${YELLOW}4. Configure Page Rules (Optional)${NC}"
+echo "   • Go to 'Rules' → 'Page Rules'"
+echo "   • Create rule: $DOMAIN/* → Always Use HTTPS"
+echo "   • Create rule: www.$DOMAIN/* → Redirect to $DOMAIN"
+echo ""
+echo -e "${YELLOW}5. SSL/TLS Settings${NC}"
+echo "   • Go to 'SSL/TLS' → 'Overview'"
+echo "   • Set encryption mode to: 'Full (strict)'"
+echo "   • Enable 'Always Use HTTPS'"
+echo ""
+echo -e "${YELLOW}6. Security Settings${NC}"
+echo "   • Go to 'Security' → 'Settings'"
+echo "   • Set Security Level to: 'Medium'"
+echo "   • Enable 'Browser Integrity Check'"
+echo "   • Enable 'Challenge Passage' (set to 30 minutes)"
+echo ""
+
+echo -e "${BLUE}🔍 DNS Record Summary:${NC}"
+echo "=================================================="
+echo "| Type | Name | Target | Proxy |"
+echo "|------|------|--------|-------|"
+echo "| CNAME | @ | $FRONTEND_URL | ✅ |"
+echo "| CNAME | api | $BACKEND_URL | ✅ |"
+echo "| CNAME | www | $FRONTEND_URL | ✅ |"
+echo ""
+
+echo -e "${BLUE}🌍 Expected URLs After Configuration:${NC}"
+echo "=================================================="
+echo -e "  Main Website: ${GREEN}https://$DOMAIN${NC}"
+echo -e "  API Endpoint: ${GREEN}https://api.$DOMAIN${NC}"
+echo -e "  www Redirect: ${GREEN}https://www.$DOMAIN${NC} (redirects to $DOMAIN)"
+echo ""
+
+echo -e "${BLUE}⚡ Performance Optimizations:${NC}"
+echo "=================================================="
+echo "• Enable 'Auto Minify' for JavaScript, CSS, and HTML"
+echo "• Enable 'Brotli' compression"
+echo "• Enable 'Rocket Loader'"
+echo "• Set 'Browser Cache TTL' to 4 hours"
+echo "• Enable 'Always Online'"
+echo ""
+
+echo -e "${BLUE}🔒 Security Recommendations:${NC}"
+echo "=================================================="
+echo "• Enable 'WAF' (Web Application Firewall)"
+echo "• Set up 'Rate Limiting' rules"
+echo "• Enable 'HSTS' (HTTP Strict Transport Security)"
+echo "• Configure 'Security Headers'"
+echo "• Set up 'Bot Management' (if available)"
+echo ""
+
+echo -e "${YELLOW}⚠️  Important Notes:${NC}"
+echo "=================================================="
+echo "1. DNS changes can take up to 24 hours to propagate globally"
+echo "2. Cloudflare's proxy (orange cloud) provides DDoS protection and caching"
+echo "3. Make sure your Google Cloud Run services allow traffic from Cloudflare"
+echo "4. Test your API endpoints after configuration"
+echo ""
+
+echo -e "${GREEN}✅ After completing these steps:${NC}"
+echo "=================================================="
+echo "• Your website will be accessible at https://$DOMAIN"
+echo "• Your API will be accessible at https://api.$DOMAIN"
+echo "• You'll have SSL certificates automatically managed by Cloudflare"
+echo "• You'll get DDoS protection and global CDN benefits"
+echo ""
+
+echo -e "${BLUE}🔧 Next Steps After DNS Setup:${NC}"
+echo "=================================================="
+echo "1. Update your frontend environment variables to use the new API URL"
+echo "2. Test all functionality with the new domain"
+echo "3. Set up monitoring and analytics"
+echo "4. Configure backup and recovery procedures"
+echo ""
+
+echo -e "${GREEN}🎉 Your FootyBets.ai will be live at https://$DOMAIN!${NC}" 

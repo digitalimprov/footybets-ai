@@ -34,7 +34,13 @@ if settings.enable_security_headers:
 if settings.environment == "production":
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=["footybets.ai", "www.footybets.ai", "api.footybets.ai"]
+        allowed_hosts=[
+            "footybets.ai", 
+            "www.footybets.ai", 
+            "api.footybets.ai",
+            "footybets-backend-818397187963.us-central1.run.app",
+            "footybets-frontend-818397187963.us-central1.run.app"
+        ]
     )
 
 # CORS middleware
