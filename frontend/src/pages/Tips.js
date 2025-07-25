@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams, useLocation } from 'react-router-dom';
 import { 
   CalendarIcon, 
   ChartBarIcon,
@@ -11,16 +11,20 @@ import { apiService } from '../services/apiService';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import SEO from '../components/SEO';
+import { urlStructure, generateGameUrl, generateSEOTitle, generateSEODescription } from '../utils/urlStructure';
 
 const Tips = () => {
+  const { roundNumber, season, teamSlug } = useParams();
+  const location = useLocation();
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedRound, setSelectedRound] = useState(null);
   const [rounds, setRounds] = useState([]);
+  const [currentSeason] = useState(new Date().getFullYear());
 
   useEffect(() => {
     loadPredictions();
-  }, []);
+  }, [roundNumber, season, teamSlug]);
 
   const loadPredictions = async () => {
     try {
@@ -32,8 +36,11 @@ const Tips = () => {
       const uniqueRounds = [...new Set(data.map(p => p.game?.round_number))].sort((a, b) => b - a);
       setRounds(uniqueRounds);
       
-      if (uniqueRounds.length > 0) {
-        setSelectedRound(uniqueRounds[0]); // Select the latest round
+      // Set selected round based on URL parameter or default to latest
+      if (roundNumber) {
+        setSelectedRound(parseInt(roundNumber));
+      } else if (uniqueRounds.length > 0) {
+        setSelectedRound(uniqueRounds[0]);
       }
     } catch (error) {
       console.error('Error loading predictions:', error);
@@ -64,7 +71,17 @@ const Tips = () => {
 
   const getRoundPredictions = () => {
     if (!selectedRound) return [];
-    return predictions.filter(p => p.game?.round_number === selectedRound);
+    let filteredPredictions = predictions.filter(p => p.game?.round_number === selectedRound);
+    
+    // Filter by team if teamSlug is provided
+    if (teamSlug) {
+      filteredPredictions = filteredPredictions.filter(p => 
+        p.game?.home_team_name?.toLowerCase().replace(/\s+/g, '-') === teamSlug ||
+        p.game?.away_team_name?.toLowerCase().replace(/\s+/g, '-') === teamSlug
+      );
+    }
+    
+    return filteredPredictions;
   };
 
   const getRoundStats = () => {
@@ -75,6 +92,34 @@ const Tips = () => {
     const lowConfidence = roundPreds.filter(p => p.confidence_score <= 0.6).length;
 
     return { total, highConfidence, mediumConfidence, lowConfidence };
+  };
+
+  const getPageTitle = () => {
+    if (teamSlug) {
+      const teamName = teamSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      return `${teamName} AFL Betting Tips`;
+    }
+    if (roundNumber) {
+      return `Round ${roundNumber} AFL Betting Tips`;
+    }
+    if (season) {
+      return `${season} AFL Betting Tips`;
+    }
+    return 'AFL Betting Tips';
+  };
+
+  const getPageDescription = () => {
+    if (teamSlug) {
+      const teamName = teamSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      return `${teamName} AFL betting tips and predictions. Get expert analysis and AI predictions for ${teamName} games.`;
+    }
+    if (roundNumber) {
+      return `Round ${roundNumber} AFL betting tips and predictions. AI-powered analysis with expert betting recommendations.`;
+    }
+    if (season) {
+      return `${season} AFL betting tips and predictions. Get expert analysis and AI predictions for the ${season} season.`;
+    }
+    return 'Get AI-powered AFL betting tips and predictions organized by rounds. Expert analysis, confidence scores, and betting recommendations for every game.';
   };
 
   if (loading) {
@@ -90,16 +135,16 @@ const Tips = () => {
   return (
     <>
       <SEO 
-        title="Betting Tips"
-        description="Get AI-powered AFL betting tips and predictions organized by rounds. Expert analysis, confidence scores, and betting recommendations for every game."
+        title={getPageTitle()}
+        description={getPageDescription()}
         keywords={['AFL betting tips', 'football predictions', 'sports betting tips', 'AFL round tips', 'betting recommendations', 'AI predictions']}
-        url="/tips"
+        url={location.pathname}
         structuredData={{
           "@context": "https://schema.org",
           "@type": "WebPage",
-          "name": "AFL Betting Tips",
-          "description": "AI-powered AFL betting tips and predictions by round",
-          "url": "https://footybets.ai/tips",
+          "name": getPageTitle(),
+          "description": getPageDescription(),
+          "url": `https://footybets.ai${location.pathname}`,
           "mainEntity": {
             "@type": "ItemList",
             "name": "AFL Betting Tips",
@@ -111,7 +156,7 @@ const Tips = () => {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Betting Tips</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{getPageTitle()}</h1>
             <p className="text-gray-600">AI predictions and betting recommendations by round</p>
           </div>
         </div>
@@ -121,9 +166,9 @@ const Tips = () => {
           <h2 className="text-lg font-semibold mb-4">Select Round</h2>
           <div className="flex flex-wrap gap-2">
             {rounds.map((round) => (
-              <button
+              <Link
                 key={round}
-                onClick={() => setSelectedRound(round)}
+                to={urlStructure.tips.round(round)}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   selectedRound === round
                     ? 'bg-blue-600 text-white'
@@ -131,7 +176,7 @@ const Tips = () => {
                 }`}
               >
                 Round {round}
-              </button>
+              </Link>
             ))}
           </div>
         </div>
@@ -240,7 +285,7 @@ const Tips = () => {
                       {/* View Details Button */}
                       <div className="pt-3 border-t border-gray-200">
                         <Link
-                          to={`/games/${prediction.game_id}`}
+                          to={generateGameUrl(prediction.game) || `/games/${prediction.game_id}`}
                           className="w-full btn-secondary flex items-center justify-center"
                         >
                           <EyeIcon className="w-4 h-4 mr-2" />

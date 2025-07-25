@@ -11,6 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../context/AuthContext';
 import { ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
+import { urlStructure } from '../utils/urlStructure';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,16 +19,16 @@ const Navbar = () => {
   const { user, isAdmin, logout } = useAuth();
 
   const navigation = [
-    { name: 'Dashboard', href: '/', icon: HomeIcon },
-    { name: 'Tips', href: '/tips', icon: TrophyIcon },
-    { name: 'Predictions', href: '/predictions', icon: ChartBarIcon },
-    { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
-    { name: 'Games', href: '/games', icon: CalendarIcon },
+    { name: 'Dashboard', href: urlStructure.home, icon: HomeIcon },
+    { name: 'Betting Tips', href: urlStructure.tips.index, icon: TrophyIcon },
+    { name: 'AI Predictions', href: urlStructure.predictions.index, icon: ChartBarIcon },
+    { name: 'Analytics', href: urlStructure.analytics.index, icon: ChartBarIcon },
+    { name: 'Fixtures', href: urlStructure.games.index, icon: CalendarIcon },
   ];
 
   // Add admin-only navigation items
   const adminNavigation = [
-    { name: 'Scraping', href: '/scraping', icon: CogIcon },
+    { name: 'Scraping', href: urlStructure.admin.scraping, icon: CogIcon },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -38,7 +39,7 @@ const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <Link to="/" className="flex items-center">
+              <Link to={urlStructure.home} className="flex items-center">
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">FB</span>
                 </div>
@@ -94,7 +95,7 @@ const Navbar = () => {
               </div>
             ) : (
               <Link
-                to="/login"
+                to={urlStructure.admin.login}
                 className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors duration-200"
               >
                 Login

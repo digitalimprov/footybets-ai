@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { 
   CalendarIcon, 
   MapPinIcon, 
@@ -12,24 +12,47 @@ import { apiService } from '../services/apiService';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import SEO from '../components/SEO';
+import { urlStructure, generateSEOTitle, generateSEODescription } from '../utils/urlStructure';
 
 const GameDetail = () => {
-  const { gameId } = useParams();
+  const { gameId, homeTeam, awayTeam, round, season } = useParams();
+  const location = useLocation();
   const [game, setGame] = useState(null);
   const [prediction, setPrediction] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadGameData();
-  }, [gameId]);
+  }, [gameId, homeTeam, awayTeam, round, season]);
 
   const loadGameData = async () => {
     try {
       setLoading(true);
-      const [gameData, predictionData] = await Promise.all([
-        apiService.getGame(gameId),
-        apiService.getPredictionByGame(gameId)
-      ]);
+      
+      // If we have URL parameters, try to find the game by teams and round
+      let gameData = null;
+      let predictionData = null;
+      
+      if (homeTeam && awayTeam && round && season) {
+        // Try to find game by URL parameters first
+        const games = await apiService.getGames();
+        gameData = games.find(g => {
+          const gHomeTeam = g.home_team_name?.toLowerCase().replace(/\s+/g, '-');
+          const gAwayTeam = g.away_team_name?.toLowerCase().replace(/\s+/g, '-');
+          return gHomeTeam === homeTeam && gAwayTeam === awayTeam && 
+                 g.round_number === parseInt(round) && g.season === parseInt(season);
+        });
+        
+        if (gameData) {
+          predictionData = await apiService.getPredictionByGame(gameData.id);
+        }
+      } else if (gameId) {
+        // Fallback to gameId
+        [gameData, predictionData] = await Promise.all([
+          apiService.getGame(gameId),
+          apiService.getPredictionByGame(gameId)
+        ]);
+      }
       
       setGame(gameData);
       setPrediction(predictionData);
@@ -60,6 +83,30 @@ const GameDetail = () => {
     }
   };
 
+  const getSEOTitle = () => {
+    if (game) {
+      return generateSEOTitle('game', {
+        homeTeam: game.home_team_name,
+        awayTeam: game.away_team_name,
+        round: game.round_number,
+        season: game.season
+      });
+    }
+    return 'AFL Game Prediction & Betting Tips';
+  };
+
+  const getSEODescription = () => {
+    if (game) {
+      return generateSEODescription('game', {
+        homeTeam: game.home_team_name,
+        awayTeam: game.away_team_name,
+        round: game.round_number,
+        season: game.season
+      });
+    }
+    return 'Get AI-powered AFL predictions and betting tips. Expert analysis, predicted scores, and betting recommendations.';
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -73,8 +120,8 @@ const GameDetail = () => {
       <div className="text-center py-12">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Game Not Found</h2>
         <p className="text-gray-600 mb-6">The game you're looking for doesn't exist.</p>
-        <Link to="/games" className="btn-primary">
-          Back to Games
+        <Link to={urlStructure.games.index} className="btn-primary">
+          Back to Fixtures
         </Link>
       </div>
     );
@@ -83,10 +130,10 @@ const GameDetail = () => {
   return (
     <>
       <SEO 
-        title={game ? `${game.home_team_name} vs ${game.away_team_name}` : 'Game Details'}
-        description={game ? `AI prediction for ${game.home_team_name} vs ${game.away_team_name} - Round ${game.round_number}. Get betting tips, predicted scores, and expert analysis.` : 'Game prediction details'}
+        title={getSEOTitle()}
+        description={getSEODescription()}
         keywords={game ? [`${game.home_team_name}`, `${game.away_team_name}`, 'AFL betting', 'football prediction', 'sports betting tips'] : ['AFL betting', 'football prediction']}
-        url={`/games/${gameId}`}
+        url={location.pathname}
         type="article"
         publishedTime={game?.game_date}
         structuredData={game ? {
@@ -122,8 +169,8 @@ const GameDetail = () => {
               Round {game.round_number} • Season {game.season}
             </p>
           </div>
-          <Link to="/games" className="btn-secondary">
-            Back to Games
+          <Link to={urlStructure.games.index} className="btn-secondary">
+            Back to Fixtures
           </Link>
         </div>
 

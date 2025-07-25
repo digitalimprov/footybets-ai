@@ -2,19 +2,32 @@ User-agent: *
 Allow: /
 
 # Disallow admin and private pages
+Disallow: /admin/
 Disallow: /login
 Disallow: /scraping
-Disallow: /admin/
 Disallow: /api/
 Disallow: /_next/
 Disallow: /static/
 
-# Allow important pages
+# Allow important SEO pages
 Allow: /
+Allow: /afl-betting-tips
+Allow: /afl-betting-tips/
+Allow: /afl-prediction/
+Allow: /afl-analysis/
+Allow: /afl-team/
+Allow: /afl-analytics
+Allow: /afl-fixtures
+Allow: /ai-predictions
+
+# Legacy routes (redirects)
 Allow: /tips
 Allow: /predictions
 Allow: /analytics
 Allow: /games
 
 # Sitemap location
-Sitemap: https://footybets.ai/sitemap.xml 
+Sitemap: https://footybets.ai/sitemap.xml
+
+# Crawl delay for better server performance
+Crawl-delay: 1 
