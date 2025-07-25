@@ -6,18 +6,27 @@ import {
   CalendarIcon, 
   CogIcon,
   Bars3Icon,
-  XMarkIcon 
+  XMarkIcon,
+  TrophyIcon
 } from '@heroicons/react/24/outline';
+import { useAuth } from '../context/AuthContext';
+import { ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { user, isAdmin, logout } = useAuth();
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: HomeIcon },
+    { name: 'Tips', href: '/tips', icon: TrophyIcon },
     { name: 'Predictions', href: '/predictions', icon: ChartBarIcon },
     { name: 'Analytics', href: '/analytics', icon: ChartBarIcon },
     { name: 'Games', href: '/games', icon: CalendarIcon },
+  ];
+
+  // Add admin-only navigation items
+  const adminNavigation = [
     { name: 'Scraping', href: '/scraping', icon: CogIcon },
   ];
 
@@ -54,6 +63,43 @@ const Navbar = () => {
                 {item.name}
               </Link>
             ))}
+            
+            {/* Admin-only navigation */}
+            {isAdmin() && adminNavigation.map((item) => (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                  isActive(item.href)
+                    ? 'bg-red-100 text-red-700'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                <item.icon className="w-5 h-5 mr-2" />
+                {item.name}
+              </Link>
+            ))}
+            
+            {/* User menu */}
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-700">Welcome, {user.username}</span>
+                <button
+                  onClick={logout}
+                  className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors duration-200"
+                >
+                  <ArrowRightOnRectangleIcon className="w-5 h-5 mr-2" />
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors duration-200"
+              >
+                Login
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -83,6 +129,23 @@ const Navbar = () => {
                 className={`flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
                   isActive(item.href)
                     ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+                onClick={() => setIsOpen(false)}
+              >
+                <item.icon className="w-5 h-5 mr-3" />
+                {item.name}
+              </Link>
+            ))}
+            
+            {/* Admin-only mobile navigation */}
+            {isAdmin() && adminNavigation.map((item) => (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
+                  isActive(item.href)
+                    ? 'bg-red-100 text-red-700'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
                 onClick={() => setIsOpen(false)}

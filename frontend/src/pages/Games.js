@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { CalendarIcon, ClockIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, ClockIcon, MapPinIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { Link } from 'react-router-dom';
 import { apiService } from '../services/apiService';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
@@ -76,6 +77,13 @@ const Games = () => {
                     </h3>
                     <p className="text-sm text-gray-600">Round {game.round_number}</p>
                   </div>
+                  <Link
+                    to={`/games/${game.id}`}
+                    className="btn-secondary flex items-center text-sm"
+                  >
+                    <EyeIcon className="w-4 h-4 mr-1" />
+                    View
+                  </Link>
                 </div>
                 
                 <div className="space-y-2">

@@ -60,6 +60,10 @@ export const apiService = {
     return api.get(`/api/predictions/${predictionId}`);
   },
 
+  getPredictionByGame: async (gameId) => {
+    return api.get('/api/predictions', { params: { game_id: gameId } });
+  },
+
   generatePredictions: async (days = 7) => {
     return api.post('/api/predictions/generate', null, { params: { days } });
   },
