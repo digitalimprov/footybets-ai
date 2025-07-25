@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: footybets-db
+    environment:
+      POSTGRES_DB: footybets
+      POSTGRES_USER: footybets_user
+      POSTGRES_PASSWORD: footybets_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - footybets-network
+    restart: unless-stopped
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: footybets-backend
+    environment:
+      - DATABASE_URL=postgresql://footybets_user:footybets_password@postgres:5432/footybets
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - SCRAPING_DELAY=1
+      - USER_AGENT=Mozilla/5.0 (compatible; FootyBets/1.0)
+      - API_SECRET_KEY=${API_SECRET_KEY}
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    networks:
+      - footybets-network
+    restart: unless-stopped
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: footybets-frontend
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - footybets-network
+    restart: unless-stopped
+    command: npm start
+
+  # Nginx Reverse Proxy (Optional)
+  nginx:
+    image: nginx:alpine
+    container_name: footybets-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - footybets-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  footybets-network:
+    driver: bridge 
