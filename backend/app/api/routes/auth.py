@@ -18,8 +18,6 @@ class UserRegister(BaseModel):
     email: EmailStr
     username: str
     password: str
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
     
     @validator('username')
     def validate_username(cls, v):
@@ -66,8 +64,6 @@ class UserResponse(BaseModel):
     id: int
     email: str
     username: str
-    first_name: Optional[str]
-    last_name: Optional[str]
     full_name: str
     is_active: bool
     is_verified: bool
@@ -117,9 +113,7 @@ async def register(
     # Create new user
     user = User(
         email=user_data.email,
-        username=user_data.username,
-        first_name=user_data.first_name,
-        last_name=user_data.last_name
+        username=user_data.username
     )
     
     # Set password with proper error handling

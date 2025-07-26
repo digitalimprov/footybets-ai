@@ -16,7 +16,7 @@ from app.core.database import SessionLocal, engine
 from app.models.user import User, ROLE_PERMISSIONS
 from app.core.security import security_manager
 
-def create_admin_user(email: str, username: str, password: str, first_name: str = None, last_name: str = None):
+def create_admin_user(email: str, username: str, password: str):
     """Create an admin user with full permissions."""
     
     db = SessionLocal()
@@ -34,8 +34,6 @@ def create_admin_user(email: str, username: str, password: str, first_name: str 
         admin_user = User(
             email=email,
             username=username,
-            first_name=first_name,
-            last_name=last_name,
             is_active=True,
             is_verified=True,
             is_admin=True,
@@ -79,8 +77,6 @@ def main():
     email = input("Enter admin email: ").strip()
     username = input("Enter admin username: ").strip()
     password = input("Enter admin password: ").strip()
-    first_name = input("Enter first name (optional): ").strip() or None
-    last_name = input("Enter last name (optional): ").strip() or None
     
     if not email or not username or not password:
         print("❌ Email, username, and password are required!")
@@ -93,14 +89,13 @@ def main():
     print(f"\n📝 Creating admin user...")
     print(f"Email: {email}")
     print(f"Username: {username}")
-    print(f"Name: {first_name} {last_name}")
     
     confirm = input("\nProceed? (y/N): ").strip().lower()
     if confirm != 'y':
         print("❌ Cancelled.")
         return
     
-    success = create_admin_user(email, username, password, first_name, last_name)
+    success = create_admin_user(email, username, password)
     
     if success:
         print("\n🎉 Admin user created successfully!")

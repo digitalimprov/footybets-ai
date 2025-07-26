@@ -12,8 +12,6 @@ router = APIRouter()
 
 # Pydantic models
 class UserUpdate(BaseModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
     is_active: Optional[bool] = None
     is_verified: Optional[bool] = None
     roles: Optional[List[str]] = None
@@ -33,8 +31,6 @@ class UserResponse(BaseModel):
     id: int
     email: str
     username: str
-    first_name: Optional[str]
-    last_name: Optional[str]
     full_name: str
     is_active: bool
     is_verified: bool
@@ -92,9 +88,7 @@ async def get_users(
         search_term = f"%{search}%"
         query = query.filter(
             (User.email.ilike(search_term)) |
-            (User.username.ilike(search_term)) |
-            (User.first_name.ilike(search_term)) |
-            (User.last_name.ilike(search_term))
+            (User.username.ilike(search_term))
         )
     
     # Apply pagination
@@ -148,12 +142,6 @@ async def update_user(
         raise HTTPException(status_code=400, detail="Cannot deactivate your own account")
     
     # Update fields
-    if user_update.first_name is not None:
-        user.first_name = user_update.first_name
-    
-    if user_update.last_name is not None:
-        user.last_name = user_update.last_name
-    
     if user_update.is_active is not None:
         user.is_active = user_update.is_active
     

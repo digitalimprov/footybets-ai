@@ -20,8 +20,6 @@ def create_admin_user():
     email = input("Enter admin email: ").strip()
     username = input("Enter admin username: ").strip()
     password = input("Enter admin password: ").strip()
-    first_name = input("Enter first name (optional): ").strip() or None
-    last_name = input("Enter last name (optional): ").strip() or None
     
     if not email or not username or not password:
         print("❌ Email, username, and password are required!")
@@ -34,7 +32,6 @@ def create_admin_user():
     print(f"\n📝 Creating admin user...")
     print(f"Email: {email}")
     print(f"Username: {username}")
-    print(f"Name: {first_name} {last_name}")
     
     confirm = input("\nProceed? (y/N): ").strip().lower()
     if confirm != 'y':
@@ -46,8 +43,6 @@ def create_admin_user():
         "email": email,
         "username": username,
         "password": password,
-        "first_name": first_name,
-        "last_name": last_name,
         "is_admin": True,
         "roles": ["admin"],
         "is_verified": True,

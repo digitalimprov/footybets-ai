@@ -15,8 +15,6 @@ class UserRegisterSimple(BaseModel):
     email: EmailStr
     username: str
     password: str
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
 
 class UserLoginSimple(BaseModel):
     email: EmailStr
@@ -56,8 +54,6 @@ async def register_simple(
         user = User(
             email=user_data.email,
             username=user_data.username,
-            first_name=user_data.first_name,
-            last_name=user_data.last_name,
             is_admin=True,  # Make admin for testing
             is_verified=True,  # Skip email verification
             is_active=True,

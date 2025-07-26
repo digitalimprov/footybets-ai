@@ -65,8 +65,6 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     
     # Profile information
-    first_name = Column(String)
-    last_name = Column(String)
     phone_number = Column(String)  # Encrypted in production
     
     # Account status
@@ -132,8 +130,6 @@ class User(Base):
     @property
     def full_name(self) -> str:
         """Get user's full name."""
-        if self.first_name and self.last_name:
-            return f"{self.first_name} {self.last_name}"
         return self.username
 
     @property
@@ -356,8 +352,6 @@ class User(Base):
             "id": self.id,
             "email": self.email,
             "username": self.username,
-            "first_name": self.first_name,
-            "last_name": self.last_name,
             "full_name": self.full_name,
             "is_active": self.is_active,
             "is_verified": self.is_verified,
