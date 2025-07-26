@@ -28,6 +28,8 @@ const Navbar = () => {
 
   // Add admin-only navigation items
   const adminNavigation = [
+    { name: 'Admin Dashboard', href: '/admin/dashboard', icon: CogIcon },
+    { name: 'Generate Content', href: '/admin/generate-content', icon: CogIcon },
     { name: 'Scraping', href: urlStructure.admin.scraping, icon: CogIcon },
   ];
 

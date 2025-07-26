@@ -170,6 +170,10 @@ export const apiService = {
     return api.get('/api/content', { params });
   },
 
+  getTeams: async () => {
+    return api.get('/api/teams');
+  },
+
   getFeaturedContent: async (limit = 5) => {
     return api.get('/api/content/featured', { params: { limit } });
   },

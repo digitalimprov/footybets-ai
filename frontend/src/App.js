@@ -14,6 +14,8 @@ import Tips from './pages/Tips';
 import Scraping from './pages/Scraping';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminGenerateContent from './pages/AdminGenerateContent';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
@@ -91,7 +93,15 @@ function App() {
                   path="/admin/dashboard" 
                   element={
                     <ProtectedRoute requireAdmin={true}>
-                      <Dashboard />
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/generate-content" 
+                  element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <AdminGenerateContent />
                     </ProtectedRoute>
                   } 
                 />
