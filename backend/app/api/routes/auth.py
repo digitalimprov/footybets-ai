@@ -121,7 +121,15 @@ async def register(
         first_name=user_data.first_name,
         last_name=user_data.last_name
     )
-    user.set_password(user_data.password)
+    
+    # Set password with proper error handling
+    try:
+        user.set_password(user_data.password)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
     
     # Generate verification token
     verification_token = user.generate_verification_token()
