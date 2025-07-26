@@ -188,6 +188,14 @@ async def security_info():
             "data_encryption": True,
             "secure_communication": True,
             "access_controls": True
+        },
+        "security_validation": {
+            "api_secret_configured": bool(settings.api_secret_key and settings.api_secret_key != "your-secret-key-change-this"),
+            "production_ready": settings.environment == "production" and not settings.debug,
+            "cors_configured": len(settings.allowed_origins) > 0,
+            "trusted_hosts_configured": settings.environment == "production",
+            "environment": settings.environment,
+            "debug_mode": settings.debug
         }
     }
 

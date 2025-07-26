@@ -14,7 +14,11 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    // Add any auth tokens here if needed
+    // Add auth token if available
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => {
@@ -28,12 +32,52 @@ api.interceptors.response.use(
     return response.data;
   },
   (error) => {
-    console.error('API Error:', error);
+    // Log error without exposing sensitive data
+    if (process.env.NODE_ENV === 'development') {
+      console.error('API Error:', error);
+    }
     throw error;
   }
 );
 
 export const apiService = {
+  // Authentication API
+  login: async (email, password) => {
+    return api.post('/api/auth/login', { email, password });
+  },
+
+  register: async (userData) => {
+    return api.post('/api/auth/register', userData);
+  },
+
+  logout: async () => {
+    return api.post('/api/auth/logout');
+  },
+
+  getCurrentUser: async () => {
+    return api.get('/api/auth/me');
+  },
+
+  refreshToken: async (refreshToken) => {
+    return api.post('/api/auth/refresh', { refresh_token: refreshToken });
+  },
+
+  requestPasswordReset: async (email) => {
+    return api.post('/api/auth/password-reset', { email });
+  },
+
+  confirmPasswordReset: async (token, newPassword) => {
+    return api.post('/api/auth/password-reset/confirm', { token, new_password: newPassword });
+  },
+
+  verifyEmail: async (token) => {
+    return api.post(`/api/auth/verify-email/${token}`);
+  },
+
+  resendVerification: async (email) => {
+    return api.post('/api/auth/resend-verification', { email });
+  },
+
   // Games API
   getGames: async (params = {}) => {
     return api.get('/api/games', { params });

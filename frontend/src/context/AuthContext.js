@@ -35,12 +35,22 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
     localStorage.setItem('accessToken', token);
     localStorage.setItem('userData', JSON.stringify(userData));
+    
+    // Set the token in axios headers for future requests
+    if (window.api) {
+      window.api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('accessToken');
     localStorage.removeItem('userData');
+    
+    // Remove the token from axios headers
+    if (window.api) {
+      delete window.api.defaults.headers.common['Authorization'];
+    }
   };
 
   const isAdmin = () => {

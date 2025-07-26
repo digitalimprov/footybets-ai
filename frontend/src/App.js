@@ -13,6 +13,7 @@ import GameDetail from './pages/GameDetail';
 import Tips from './pages/Tips';
 import Scraping from './pages/Scraping';
 import Login from './pages/Login';
+import Register from './pages/Register';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
@@ -95,8 +96,9 @@ function App() {
                   } 
                 />
                 
-                {/* Legacy admin routes */}
+                {/* Authentication routes */}
                 <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
                 <Route 
                   path="/scraping" 
                   element={

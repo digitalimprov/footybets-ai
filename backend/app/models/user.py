@@ -111,9 +111,9 @@ class User(Base):
         super().__init__(**kwargs)
         # Set default roles and permissions
         if not self.roles:
-            self.roles = ["user"]
+            self.roles = ["subscriber"]
         if not self.permissions:
-            self.permissions = ROLE_PERMISSIONS.get("user", [])
+            self.permissions = ROLE_PERMISSIONS.get("subscriber", [])
         if not self.privacy_settings:
             self.privacy_settings = {
                 "profile_visible": True,

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { apiService } from '../services/apiService';
 import toast from 'react-hot-toast';
 import SEO from '../components/SEO';
 
@@ -16,25 +17,17 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // For demo purposes, we'll simulate login with hardcoded admin user
-      // In production, this would call the actual API
-      const mockUser = {
-        id: 1,
-        email: email,
-        username: 'admin',
-        is_admin: true,
-        roles: ['admin'],
-        permissions: ['read_predictions', 'write_predictions', 'read_analytics', 'write_analytics', 'read_games', 'write_games', 'read_users', 'write_users', 'read_system', 'write_system', 'manage_scraping', 'manage_ai', 'view_security_logs', 'manage_roles', 'export_data', 'manage_subscriptions']
-      };
-
-      const mockToken = 'mock-jwt-token';
+      const response = await apiService.login(email, password);
       
-      login(mockUser, mockToken);
-      toast.success('Login successful!');
-      navigate('/');
+      if (response.data) {
+        login(response.data.user, response.data.access_token);
+        toast.success('Login successful!');
+        navigate('/');
+      }
     } catch (error) {
       console.error('Login error:', error);
-      toast.error('Login failed');
+      const errorMessage = error.response?.data?.detail || 'Login failed. Please check your credentials.';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -107,9 +100,17 @@ const Login = () => {
               </button>
             </div>
 
-            <div className="text-center">
+            <div className="text-center space-y-2">
               <p className="text-sm text-gray-600">
-                Demo: Use any email/password to login as admin
+                Don't have an account?{' '}
+                <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
+                  Sign up here
+                </Link>
+              </p>
+              <p className="text-sm text-gray-600">
+                <Link to="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
+                  Forgot your password?
+                </Link>
               </p>
             </div>
           </form>

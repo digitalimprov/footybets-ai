@@ -14,7 +14,16 @@ class Settings(BaseSettings):
     user_agent: str = "Mozilla/5.0 (compatible; FootyBets/1.0)"
 
     # API settings
-    api_secret_key: str = "your-secret-key-change-this"
+    api_secret_key: str = None  # Must be set via environment variable
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Validate required security settings
+        if self.environment == "production":
+            if not self.api_secret_key or self.api_secret_key == "your-secret-key-change-this":
+                raise ValueError("API_SECRET_KEY must be set in production environment")
+            if not self.secret_key or self.secret_key == "your-secret-key-change-this":
+                raise ValueError("SECRET_KEY must be set in production environment")
     
     # Security settings
     secret_key: str = secrets.token_urlsafe(32)
@@ -54,10 +63,10 @@ class Settings(BaseSettings):
     
     # CORS settings
     allowed_origins: List[str] = [
-        "http://localhost:3000",
-        "http://localhost:8000",
         "https://footybets.ai",
-        "https://www.footybets.ai"
+        "https://www.footybets.ai",
+        "https://footybets-frontend-818397187963.us-central1.run.app",
+        "https://footybets-backend-818397187963.us-central1.run.app"
     ]
     
     # Security headers
