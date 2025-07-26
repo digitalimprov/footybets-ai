@@ -12,21 +12,47 @@ const Register = () => {
     confirmPassword: ''
   });
   const [loading, setLoading] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState({
+    length: false,
+    uppercase: false,
+    lowercase: false,
+    number: false,
+    special: false
+  });
   const navigate = useNavigate();
 
   const passwordRequirements = [
-    'At least 8 characters',
-    'At least one uppercase letter',
-    'At least one lowercase letter',
-    'At least one number',
-    'At least one special character (!@#$%^&* etc.)'
+    { key: 'length', text: 'At least 8 characters', met: passwordStrength.length },
+    { key: 'uppercase', text: 'At least one uppercase letter', met: passwordStrength.uppercase },
+    { key: 'lowercase', text: 'At least one lowercase letter', met: passwordStrength.lowercase },
+    { key: 'number', text: 'At least one number', met: passwordStrength.number },
+    { key: 'special', text: 'At least one special character (!@#$%^&* etc.)', met: passwordStrength.special }
   ];
 
+  const checkPasswordStrength = (password) => {
+    setPasswordStrength({
+      length: password.length >= 8,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /\d/.test(password),
+      special: /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(password)
+    });
+  };
+
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+
+    if (name === 'password') {
+      checkPasswordStrength(value);
+    }
+  };
+
+  const isPasswordValid = () => {
+    return Object.values(passwordStrength).every(Boolean);
   };
 
   const handleSubmit = async (e) => {
@@ -34,6 +60,11 @@ const Register = () => {
     
     if (formData.password !== formData.confirmPassword) {
       toast.error('Passwords do not match');
+      return;
+    }
+
+    if (!isPasswordValid()) {
+      toast.error('Please ensure your password meets all requirements');
       return;
     }
 
@@ -125,15 +156,28 @@ const Register = () => {
                   autoComplete="new-password"
                   required
                   className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Password (min 8 characters)"
+                  placeholder="Password"
                   value={formData.password}
                   onChange={handleChange}
                 />
-                <ul className="mt-2 ml-4 list-disc text-xs text-gray-500">
-                  {passwordRequirements.map((req, idx) => (
-                    <li key={idx}>{req}</li>
+                <ul className="mt-2 ml-4 list-disc text-xs space-y-1">
+                  {passwordRequirements.map((req) => (
+                    <li 
+                      key={req.key} 
+                      className={`flex items-center ${req.met ? 'text-green-600' : 'text-gray-500'}`}
+                    >
+                      <span className={`mr-2 ${req.met ? 'text-green-500' : 'text-gray-400'}`}>
+                        {req.met ? '✓' : '○'}
+                      </span>
+                      {req.text}
+                    </li>
                   ))}
                 </ul>
+                {formData.password && (
+                  <div className={`mt-2 text-xs font-medium ${isPasswordValid() ? 'text-green-600' : 'text-gray-500'}`}>
+                    {isPasswordValid() ? '✓ Password meets all requirements' : 'Please complete all password requirements'}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -151,14 +195,19 @@ const Register = () => {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                 />
+                {formData.confirmPassword && (
+                  <div className={`mt-2 text-xs font-medium ${formData.password === formData.confirmPassword ? 'text-green-600' : 'text-red-600'}`}>
+                    {formData.password === formData.confirmPassword ? '✓ Passwords match' : '✗ Passwords do not match'}
+                  </div>
+                )}
               </div>
             </div>
 
             <div>
               <button
                 type="submit"
-                disabled={loading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                disabled={loading || !isPasswordValid() || formData.password !== formData.confirmPassword}
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Creating account...' : 'Create account'}
               </button>
