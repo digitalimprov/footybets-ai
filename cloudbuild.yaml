@@ -29,7 +29,7 @@ steps:
       - '--max-instances'
       - '10'
       - '--set-env-vars'
-      - 'DATABASE_URL=postgresql://footybets_user:footybets_password@/footybets-ai:us-central1:footybets-db/footybets'
+      - 'DATABASE_URL=postgresql://footybets_user:footybets_password@34.69.151.218:5432/footybets'
       - '--set-env-vars'
       - 'GEMINI_API_KEY=${_GEMINI_API_KEY}'
       - '--set-env-vars'
