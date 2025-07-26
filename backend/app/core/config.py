@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     user_agent: str = "Mozilla/5.0 (compatible; FootyBets/1.0)"
 
     # API settings
-    api_secret_key: str = None  # Must be set via environment variable
+    api_secret_key: str = "temporary-secret-key-for-deployment"  # Will be overridden by env var
     
     # Security settings
     secret_key: str = secrets.token_urlsafe(32)

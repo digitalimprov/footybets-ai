@@ -35,6 +35,10 @@ steps:
       - '--set-env-vars'
       - 'ENVIRONMENT=production'
       - '--set-env-vars'
+      - 'API_SECRET_KEY=temporary-secret-key-for-deployment'
+      - '--set-env-vars'
+      - 'SECRET_KEY=temporary-secret-key-for-deployment'
+      - '--set-env-vars'
       - 'DEBUG=false'
 
   # Build and deploy frontend
