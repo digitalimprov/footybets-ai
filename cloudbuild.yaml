@@ -29,7 +29,7 @@ steps:
       - '--max-instances'
       - '10'
       - '--set-env-vars'
-      - 'DATABASE_URL=postgresql://footybets_user:footybets_password@34.69.151.218:5432/footybets'
+      - 'DATABASE_URL=postgresql://footybets_user:footybets_password@/footybets-ai:us-central1:footybets-db/footybets'
       - '--set-env-vars'
       - 'GEMINI_API_KEY=${_GEMINI_API_KEY}'
       - '--set-env-vars'
@@ -71,7 +71,7 @@ steps:
       - '--max-instances'
       - '5'
       - '--set-env-vars'
-      - 'REACT_APP_API_URL=https://footybets-backend-818397187963.us-central1.run.app'
+      - 'REACT_APP_API_URL=https://footybets-backend-wlbnzevhqa-uc.a.run.app'
 
   # Update Cloud Storage with Brownlow content
   - name: 'gcr.io/cloud-builders/gsutil'
