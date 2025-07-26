@@ -118,4 +118,7 @@ dist/
 *.backup
 
 # Local development
-docker-compose.override.yml 
+docker-compose.override.yml
+
+# Brownlow content backups
+backend/brownlow_web_content_backup_* 
