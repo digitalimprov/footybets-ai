@@ -76,7 +76,9 @@ async def register_simple(
         
     except Exception as e:
         db.rollback()
+        import traceback
         print(f"Registration error: {str(e)}")
+        print(f"Traceback: {traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Registration failed: {str(e)}"

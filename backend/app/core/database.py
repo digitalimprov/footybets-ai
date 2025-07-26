@@ -64,7 +64,9 @@ def test_database_connection():
     """Test database connectivity"""
     try:
         with engine.connect() as conn:
-            conn.execute("SELECT 1")
+            from sqlalchemy import text
+            result = conn.execute(text("SELECT 1"))
+            result.fetchone()
         logger.info("Database connection successful")
         return True
     except Exception as e:
