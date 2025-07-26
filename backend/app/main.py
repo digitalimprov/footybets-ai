@@ -6,7 +6,7 @@ from fastapi.exceptions import RequestValidationError
 import time
 import logging
 
-from app.api.routes import games, predictions, analytics, scraping, auth, admin, content
+from app.api.routes import games, predictions, analytics, scraping, auth, admin
 from app.core.config import settings
 from app.core.security import SecurityMiddleware, log_security_event
 
@@ -139,7 +139,6 @@ app.include_router(predictions.router, prefix="/api/predictions", tags=["predict
 app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
 app.include_router(scraping.router, prefix="/api/scraping", tags=["scraping"])
 app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
-app.include_router(content.router, prefix="/api/content", tags=["content"])
 
 @app.get("/")
 async def root():
