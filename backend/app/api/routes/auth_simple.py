@@ -97,7 +97,7 @@ async def login_simple(
         # Find user by email
         user = db.query(User).filter(User.email == form_data.email).first()
         
-        if not user or not user.check_password(form_data.password):
+        if not user or not user.verify_password(form_data.password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password"
