@@ -35,10 +35,6 @@ steps:
       - '--set-env-vars'
       - 'ENVIRONMENT=production'
       - '--set-env-vars'
-      - 'API_SECRET_KEY=${_API_SECRET_KEY}'
-      - '--set-env-vars'
-      - 'SECRET_KEY=${_SECRET_KEY}'
-      - '--set-env-vars'
       - 'DEBUG=false'
 
   # Build and deploy frontend
@@ -79,8 +75,6 @@ steps:
 
 substitutions:
   _GEMINI_API_KEY: 'your-gemini-api-key-here'  # Set this in Cloud Build triggers
-  _API_SECRET_KEY: 'your-api-secret-key-here'  # Set this in Cloud Build triggers
-  _SECRET_KEY: 'your-secret-key-here'  # Set this in Cloud Build triggers
 
 options:
   logging: CLOUD_LOGGING_ONLY
