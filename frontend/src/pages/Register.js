@@ -71,17 +71,38 @@ const Register = () => {
     setLoading(true);
 
     try {
+      console.log('Attempting registration with:', { email: formData.email, username: formData.username });
+      
       const response = await apiService.register({
         email: formData.email,
         username: formData.username,
         password: formData.password
       });
       
-      toast.success('Registration successful! Please check your email to verify your account.');
-      navigate('/login');
+      console.log('Registration response:', response);
+      
+      if (response && response.message) {
+        toast.success('Registration successful! Please check your email to verify your account.');
+        navigate('/login');
+      } else {
+        console.error('Unexpected response format:', response);
+        toast.error('Registration failed. Unexpected response format.');
+      }
     } catch (error) {
       console.error('Registration error:', error);
-      const errorMessage = error.response?.data?.detail || 'Registration failed. Please try again.';
+      console.error('Error response:', error.response);
+      console.error('Error message:', error.message);
+      
+      let errorMessage = 'Registration failed. Please try again.';
+      
+      if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast.error(errorMessage);
     } finally {
       setLoading(false);
