@@ -7,6 +7,7 @@ import time
 import logging
 
 from app.api.routes import games, predictions, analytics, scraping, auth, admin, content
+from app.api.routes import auth_simple
 from app.core.config import settings
 from app.core.security import SecurityMiddleware, log_security_event
 
@@ -134,6 +135,7 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
+app.include_router(auth_simple.router, prefix="/api/auth", tags=["authentication"])
 app.include_router(games.router, prefix="/api/games", tags=["games"])
 app.include_router(predictions.router, prefix="/api/predictions", tags=["predictions"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
