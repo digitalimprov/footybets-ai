@@ -120,6 +120,59 @@ export const apiService = {
   healthCheck: async () => {
     return api.get('/health');
   },
+
+  // Content Management API
+  getContent: async (params = {}) => {
+    return api.get('/api/content', { params });
+  },
+
+  getFeaturedContent: async (limit = 5) => {
+    return api.get('/api/content/featured', { params: { limit } });
+  },
+
+  getContentById: async (contentId) => {
+    return api.get(`/api/content/${contentId}`);
+  },
+
+  getContentBySlug: async (slug) => {
+    return api.get(`/api/content/slug/${slug}`);
+  },
+
+  generateContent: async (contentData) => {
+    return api.post('/api/content/generate', contentData);
+  },
+
+  generateGameAnalysis: async (gameId) => {
+    return api.post(`/api/content/generate/game-analysis/${gameId}`);
+  },
+
+  generateTeamPreview: async (teamId, season = 2024) => {
+    return api.post(`/api/content/generate/team-preview/${teamId}`, null, { params: { season } });
+  },
+
+  updateContent: async (contentId, updates) => {
+    return api.put(`/api/content/${contentId}`, updates);
+  },
+
+  publishContent: async (contentId) => {
+    return api.post(`/api/content/${contentId}/publish`);
+  },
+
+  archiveContent: async (contentId) => {
+    return api.post(`/api/content/${contentId}/archive`);
+  },
+
+  deleteContent: async (contentId) => {
+    return api.delete(`/api/content/${contentId}`);
+  },
+
+  getContentTemplates: async () => {
+    return api.get('/api/content/templates');
+  },
+
+  getContentAnalytics: async (contentId, period = 'daily') => {
+    return api.get(`/api/content/${contentId}/analytics`, { params: { period } });
+  },
 };
 
 export default apiService; 

@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Predictions from './pages/Predictions';
 import Analytics from './pages/Analytics';
@@ -25,7 +26,7 @@ function App() {
             <main className="container mx-auto px-4 py-8">
               <Routes>
                 {/* Main pages */}
-                <Route path="/" element={<Dashboard />} />
+                <Route path="/" element={<Home />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 
                 {/* SEO-optimized tips and predictions */}
