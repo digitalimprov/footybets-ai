@@ -9,12 +9,18 @@ const Register = () => {
     email: '',
     username: '',
     password: '',
-    confirmPassword: '',
-    firstName: '',
-    lastName: ''
+    confirmPassword: ''
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const passwordRequirements = [
+    'At least 8 characters',
+    'At least one uppercase letter',
+    'At least one lowercase letter',
+    'At least one number',
+    'At least one special character (!@#$%^&* etc.)'
+  ];
 
   const handleChange = (e) => {
     setFormData({
@@ -31,20 +37,13 @@ const Register = () => {
       return;
     }
 
-    if (formData.password.length < 8) {
-      toast.error('Password must be at least 8 characters long');
-      return;
-    }
-
     setLoading(true);
 
     try {
       const response = await apiService.register({
         email: formData.email,
         username: formData.username,
-        password: formData.password,
-        first_name: formData.firstName,
-        last_name: formData.lastName
+        password: formData.password
       });
       
       toast.success('Registration successful! Please check your email to verify your account.');
@@ -81,39 +80,6 @@ const Register = () => {
           </div>
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                    First Name
-                  </label>
-                  <input
-                    id="firstName"
-                    name="firstName"
-                    type="text"
-                    autoComplete="given-name"
-                    className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    placeholder="First name"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                    Last Name
-                  </label>
-                  <input
-                    id="lastName"
-                    name="lastName"
-                    type="text"
-                    autoComplete="family-name"
-                    className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    placeholder="Last name"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-              
               <div>
                 <label htmlFor="username" className="block text-sm font-medium text-gray-700">
                   Username
@@ -163,6 +129,11 @@ const Register = () => {
                   value={formData.password}
                   onChange={handleChange}
                 />
+                <ul className="mt-2 ml-4 list-disc text-xs text-gray-500">
+                  {passwordRequirements.map((req, idx) => (
+                    <li key={idx}>{req}</li>
+                  ))}
+                </ul>
               </div>
 
               <div>
