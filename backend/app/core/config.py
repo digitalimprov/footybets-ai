@@ -56,6 +56,7 @@ class Settings(BaseSettings):
     allowed_origins: List[str] = [
         "https://footybets.ai",
         "https://www.footybets.ai",
+        "https://api.footybets.ai",
         "https://footybets-frontend-818397187963.us-central1.run.app",
         "https://footybets-backend-818397187963.us-central1.run.app",
         "https://footybets-frontend-wlbnzevhqa-uc.a.run.app",

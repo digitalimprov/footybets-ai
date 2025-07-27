@@ -9,8 +9,8 @@ if (process.env.NODE_ENV === 'production' && !API_BASE_URL.startsWith('https://'
   if (API_BASE_URL.startsWith('http://')) {
     API_BASE_URL = API_BASE_URL.replace('http://', 'https://');
   } else if (API_BASE_URL.includes('footybets-backend')) {
-    // If it's a footybets backend URL, ensure it's HTTPS
-    API_BASE_URL = 'https://footybets-backend-wlbnzevhqa-uc.a.run.app';
+    // If it's a footybets backend URL, use the custom domain
+    API_BASE_URL = 'https://api.footybets.ai';
   }
 }
 
