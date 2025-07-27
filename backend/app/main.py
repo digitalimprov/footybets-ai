@@ -54,7 +54,14 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
+
+# Handle OPTIONS requests for CORS preflight
+@app.options("/{full_path:path}")
+async def options_handler(request: Request):
+    """Handle CORS preflight requests."""
+    return {"message": "OK"}
 
 # Request timing middleware
 @app.middleware("http")
@@ -65,6 +72,62 @@ async def add_process_time_header(request: Request, call_next):
     response.headers["X-Process-Time"] = str(process_time)
     return response
 
+# Admin rate limiting middleware
+@app.middleware("http")
+async def admin_rate_limit_middleware(request: Request, call_next):
+    """Provide higher rate limits for admin users."""
+    from app.core.security import security_manager
+    from app.core.database import get_db
+    from app.models.user import User
+    import jwt
+    
+    client_ip = request.client.host
+    
+    # Check if this is an admin request by looking for auth header
+    auth_header = request.headers.get("authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        try:
+            token = auth_header.split(" ")[1]
+            payload = security_manager.verify_token(token)
+            user_id = payload.get("sub")
+            
+            if user_id:
+                # Get user from database
+                db = next(get_db())
+                user = db.query(User).filter(User.id == user_id).first()
+                
+                if user and user.is_admin:
+                    # Admin users get higher rate limits
+                    if not security_manager.check_rate_limit(f"admin_{client_ip}", max_requests=1000, window_seconds=3600):
+                        return JSONResponse(
+                            status_code=429,
+                            content={"detail": "Admin rate limit exceeded"}
+                        )
+                else:
+                    # Regular users get standard rate limits
+                    if not security_manager.check_rate_limit(f"user_{client_ip}", max_requests=100, window_seconds=3600):
+                        return JSONResponse(
+                            status_code=429,
+                            content={"detail": "Rate limit exceeded"}
+                        )
+        except Exception:
+            # If token verification fails, use standard rate limiting
+            if not security_manager.check_rate_limit(f"user_{client_ip}", max_requests=100, window_seconds=3600):
+                return JSONResponse(
+                    status_code=429,
+                    content={"detail": "Rate limit exceeded"}
+                )
+    else:
+        # No auth header, use standard rate limiting
+        if not security_manager.check_rate_limit(f"user_{client_ip}", max_requests=100, window_seconds=3600):
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "Rate limit exceeded"}
+            )
+    
+    response = await call_next(request)
+    return response
+
 # Security logging middleware
 @app.middleware("http")
 async def log_security_events(request: Request, call_next):
@@ -72,26 +135,37 @@ async def log_security_events(request: Request, call_next):
     client_ip = request.client.host
     user_agent = request.headers.get("user-agent", "")
     
-    # Check for suspicious patterns
+    # Check for suspicious patterns (exclude legitimate admin routes)
     suspicious_patterns = [
         "sqlmap", "nikto", "nmap", "dirb", "gobuster", "wfuzz",
-        "admin", "wp-admin", "phpmyadmin", "config", ".env",
+        "wp-admin", "phpmyadmin", "config", ".env",
         "union select", "drop table", "insert into", "delete from"
     ]
     
     request_path = request.url.path.lower()
     request_query = str(request.query_params).lower()
     
-    for pattern in suspicious_patterns:
-        if pattern in request_path or pattern in request_query or pattern in user_agent.lower():
-            log_security_event("suspicious_request", None, {
-                "ip_address": client_ip,
-                "user_agent": user_agent,
-                "path": request.url.path,
-                "query": str(request.query_params),
-                "pattern": pattern
-            })
-            break
+    # Skip security logging for legitimate admin routes
+    legitimate_admin_routes = [
+        "/api/admin",
+        "/admin/dashboard",
+        "/admin/login"
+    ]
+    
+    is_legitimate_admin_route = any(route in request_path for route in legitimate_admin_routes)
+    
+    # Only check suspicious patterns if not a legitimate admin route
+    if not is_legitimate_admin_route:
+        for pattern in suspicious_patterns:
+            if pattern in request_path or pattern in request_query or pattern in user_agent.lower():
+                log_security_event("suspicious_request", None, {
+                    "ip_address": client_ip,
+                    "user_agent": user_agent,
+                    "path": request.url.path,
+                    "query": str(request.query_params),
+                    "pattern": pattern
+                })
+                break
     
     response = await call_next(request)
     return response

@@ -4,10 +4,12 @@ from typing import Optional
 from datetime import datetime, timedelta
 from pydantic import BaseModel, EmailStr
 import re
+import logging
 
 from app.core.database import get_db
 from app.models.user import User
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 # Simplified Pydantic models
@@ -77,8 +79,9 @@ async def register_simple(
     except Exception as e:
         db.rollback()
         import traceback
-        print(f"Registration error: {str(e)}")
-        print(f"Traceback: {traceback.format_exc()}")
+        error_details = f"Registration error: {str(e)}\nTraceback: {traceback.format_exc()}"
+        print(error_details)
+        logger.error(error_details)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Registration failed: {str(e)}"

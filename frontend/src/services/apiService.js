@@ -1,6 +1,25 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+// Determine API base URL
+let API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
+// In production, ensure we're using HTTPS
+if (process.env.NODE_ENV === 'production' && !API_BASE_URL.startsWith('https://')) {
+  // If we're in production and the URL doesn't start with https, try to fix it
+  if (API_BASE_URL.startsWith('http://')) {
+    API_BASE_URL = API_BASE_URL.replace('http://', 'https://');
+  } else if (API_BASE_URL.includes('footybets-backend')) {
+    // If it's a footybets backend URL, ensure it's HTTPS
+    API_BASE_URL = 'https://footybets-backend-wlbnzevhqa-uc.a.run.app';
+  }
+}
+
+// Debug logging
+if (process.env.NODE_ENV === 'development') {
+  console.log('API Base URL:', API_BASE_URL);
+  console.log('Environment:', process.env.NODE_ENV);
+  console.log('REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
+}
 
 // Create axios instance
 const api = axios.create({
@@ -32,10 +51,27 @@ api.interceptors.response.use(
     return response.data;
   },
   (error) => {
-    // Log error without exposing sensitive data
+    // Enhanced error logging for debugging
     if (process.env.NODE_ENV === 'development') {
-      console.error('API Error:', error);
+      console.error('API Error Details:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        url: error.config?.url,
+        method: error.config?.method,
+        headers: error.config?.headers,
+        data: error.response?.data
+      });
     }
+    
+    // Handle authentication errors
+    if (error.response?.status === 401) {
+      console.log('Authentication error - clearing tokens');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('userData');
+      // You might want to redirect to login here
+    }
+    
     throw error;
   }
 );

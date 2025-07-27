@@ -19,14 +19,30 @@ const Login = () => {
     try {
       const response = await apiService.login(email, password);
       
-      if (response.data) {
-        login(response.data.user, response.data.access_token);
+      console.log('Login response:', response);
+      
+      if (response && response.user && response.access_token) {
+        login(response.user, response.access_token);
         toast.success('Login successful!');
         navigate('/');
+      } else {
+        console.error('Unexpected response format:', response);
+        toast.error('Login failed. Unexpected response format.');
       }
     } catch (error) {
       console.error('Login error:', error);
-      const errorMessage = error.response?.data?.detail || 'Login failed. Please check your credentials.';
+      console.error('Error response:', error.response);
+      
+      let errorMessage = 'Login failed. Please check your credentials.';
+      
+      if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast.error(errorMessage);
     } finally {
       setLoading(false);

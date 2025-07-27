@@ -4,6 +4,8 @@ import pandas as pd
 from typing import List, Dict, Optional
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
+import os
+from pathlib import Path
 from app.core.config import settings
 from app.models.game import Game
 from app.models.team import Team
@@ -16,8 +18,173 @@ class AFLPredictor:
     def __init__(self):
         genai.configure(api_key=settings.gemini_api_key)
         self.model = genai.GenerativeModel('gemini-1.5-flash')
-        self.model_version = "1.0.0"
+        self.model_version = "2.0.0"  # Updated version for hybrid approach
         
+        # JSON data paths
+        self.data_dir = Path(__file__).parent.parent.parent / "brownlow_web_content"
+        self.json_files = {
+            'brownlow_2024': 'brownlow_analysis_2024.json',
+            'brownlow_2023': 'brownlow_analysis_2023.json',
+            'brownlow_2022': 'brownlow_analysis_2022.json',
+            'brownlow_2021': 'brownlow_analysis_2021.json',
+            'brownlow_2020': 'brownlow_analysis_2020.json',
+            'games_2025': 'afl_2025_games_20250725_201541.json',
+            'games_with_stats': 'afl_2025_games_with_stats_20250725_202121.json'
+        }
+        
+        # Cache for JSON data
+        self._json_cache = {}
+        
+    def _load_json_context(self, file_key: str) -> Dict:
+        """Load JSON context data with caching"""
+        if file_key in self._json_cache:
+            return self._json_cache[file_key]
+            
+        try:
+            file_path = self.data_dir / self.json_files.get(file_key)
+            if file_path.exists():
+                with open(file_path, 'r') as f:
+                    data = json.load(f)
+                    self._json_cache[file_key] = data
+                    logger.info(f"Loaded JSON context: {file_key}")
+                    return data
+            else:
+                logger.warning(f"JSON file not found: {file_path}")
+                return {}
+        except Exception as e:
+            logger.error(f"Error loading JSON context {file_key}: {e}")
+            return {}
+    
+    def _get_team_brownlow_context(self, team_name: str, season: int = 2024) -> Dict:
+        """Get Brownlow vote context for a team"""
+        brownlow_data = self._load_json_context(f'brownlow_{season}')
+        
+        team_context = {
+            'top_players': [],
+            'vote_leaders': [],
+            'season_performance': {}
+        }
+        
+        try:
+            if 'analysis' in brownlow_data and 'rounds' in brownlow_data['analysis']:
+                rounds = brownlow_data['analysis']['rounds']
+                
+                # Collect all games for this team
+                team_games = []
+                for round_key, games in rounds.items():
+                    for game in games:
+                        if game.get('home_team') == team_name or game.get('away_team') == team_name:
+                            team_games.append(game)
+                
+                # Analyze player performance
+                player_votes = {}
+                for game in team_games:
+                    for vote in game.get('predicted_votes', []):
+                        if vote.get('team_name') == team_name:
+                            player_name = vote.get('player_name', '')
+                            votes = vote.get('votes', 0)
+                            if player_name not in player_votes:
+                                player_votes[player_name] = 0
+                            player_votes[player_name] += votes
+                
+                # Get top players
+                sorted_players = sorted(player_votes.items(), key=lambda x: x[1], reverse=True)
+                team_context['top_players'] = sorted_players[:5]
+                team_context['vote_leaders'] = [p[0] for p in sorted_players[:3]]
+                
+        except Exception as e:
+            logger.error(f"Error processing Brownlow context for {team_name}: {e}")
+            
+        return team_context
+    
+    def _get_advanced_game_stats(self, home_team: str, away_team: str) -> Dict:
+        """Get advanced statistics from JSON files"""
+        games_data = self._load_json_context('games_with_stats')
+        
+        advanced_stats = {
+            'home_team_stats': {},
+            'away_team_stats': {},
+            'head_to_head_advanced': {}
+        }
+        
+        try:
+            if 'games' in games_data:
+                # Find recent games for both teams
+                home_games = [g for g in games_data['games'] if g.get('home_team') == home_team or g.get('away_team') == home_team]
+                away_games = [g for g in games_data['games'] if g.get('home_team') == away_team or g.get('away_team') == away_team]
+                
+                # Process home team stats
+                if home_games:
+                    home_stats = self._calculate_team_stats(home_games, home_team)
+                    advanced_stats['home_team_stats'] = home_stats
+                
+                # Process away team stats
+                if away_games:
+                    away_stats = self._calculate_team_stats(away_games, away_team)
+                    advanced_stats['away_team_stats'] = away_stats
+                    
+        except Exception as e:
+            logger.error(f"Error getting advanced stats: {e}")
+            
+        return advanced_stats
+    
+    def _calculate_team_stats(self, games: List[Dict], team_name: str) -> Dict:
+        """Calculate advanced statistics for a team"""
+        stats = {
+            'avg_score': 0,
+            'avg_conceded': 0,
+            'home_avg_score': 0,
+            'away_avg_score': 0,
+            'recent_form': [],
+            'high_scoring_games': 0,
+            'low_scoring_games': 0
+        }
+        
+        if not games:
+            return stats
+            
+        total_score = 0
+        total_conceded = 0
+        home_scores = []
+        away_scores = []
+        recent_results = []
+        
+        for game in games[-10:]:  # Last 10 games
+            is_home = game.get('home_team') == team_name
+            team_score = game.get('home_score', 0) if is_home else game.get('away_score', 0)
+            opponent_score = game.get('away_score', 0) if is_home else game.get('home_score', 0)
+            
+            total_score += team_score
+            total_conceded += opponent_score
+            
+            if is_home:
+                home_scores.append(team_score)
+            else:
+                away_scores.append(team_score)
+            
+            # Recent form
+            if team_score > opponent_score:
+                recent_results.append('W')
+            elif team_score < opponent_score:
+                recent_results.append('L')
+            else:
+                recent_results.append('D')
+            
+            # Scoring patterns
+            if team_score >= 100:
+                stats['high_scoring_games'] += 1
+            elif team_score <= 60:
+                stats['low_scoring_games'] += 1
+        
+        # Calculate averages
+        stats['avg_score'] = total_score / len(games) if games else 0
+        stats['avg_conceded'] = total_conceded / len(games) if games else 0
+        stats['home_avg_score'] = sum(home_scores) / len(home_scores) if home_scores else 0
+        stats['away_avg_score'] = sum(away_scores) / len(away_scores) if away_scores else 0
+        stats['recent_form'] = recent_results[-5:]  # Last 5 games
+        
+        return stats
+    
     def generate_predictions(self, db: Session, upcoming_games: List[Game]) -> List[Prediction]:
         """Generate predictions for upcoming games"""
         predictions = []
@@ -196,17 +363,24 @@ class AFLPredictor:
     
     def _prepare_prediction_context(self, game: Game, home_data: Dict, away_data: Dict, 
                                   h2h_data: Dict, home_form: List, away_form: List) -> str:
-        """Prepare context string for AI prediction"""
+        """Prepare enhanced context string for AI prediction using hybrid approach"""
         home_team = game.home_team
         away_team = game.away_team
         
+        # Get enhanced context from JSON files
+        home_brownlow = self._get_team_brownlow_context(home_team.name)
+        away_brownlow = self._get_team_brownlow_context(away_team.name)
+        advanced_stats = self._get_advanced_game_stats(home_team.name, away_team.name)
+        
         context = f"""
-        AFL Game Prediction Analysis
+        AFL Game Prediction Analysis - Enhanced AI Model v2.0
         
         Upcoming Game:
         {home_team.name} (Home) vs {away_team.name} (Away)
         Venue: {game.venue}
         Date: {game.game_date}
+        
+        === DATABASE STATISTICS ===
         
         {home_team.name} Historical Performance (Last 2 seasons):
         - Total Games: {home_data['total_games']}
@@ -228,18 +402,50 @@ class AFLPredictor:
         - {away_team.name} Wins: {h2h_data['team2_wins']}
         - Draws: {h2h_data['draws']}
         
+        === ENHANCED JSON CONTEXT ===
+        
+        {home_team.name} Advanced Statistics (2025 Season):
+        - Average Score: {advanced_stats.get('home_team_stats', {}).get('avg_score', 0):.1f}
+        - Average Conceded: {advanced_stats.get('home_team_stats', {}).get('avg_conceded', 0):.1f}
+        - Home Average Score: {advanced_stats.get('home_team_stats', {}).get('home_avg_score', 0):.1f}
+        - Recent Form: {', '.join(advanced_stats.get('home_team_stats', {}).get('recent_form', []))}
+        - High Scoring Games: {advanced_stats.get('home_team_stats', {}).get('high_scoring_games', 0)}
+        - Low Scoring Games: {advanced_stats.get('home_team_stats', {}).get('low_scoring_games', 0)}
+        
+        {away_team.name} Advanced Statistics (2025 Season):
+        - Average Score: {advanced_stats.get('away_team_stats', {}).get('avg_score', 0):.1f}
+        - Average Conceded: {advanced_stats.get('away_team_stats', {}).get('avg_conceded', 0):.1f}
+        - Away Average Score: {advanced_stats.get('away_team_stats', {}).get('away_avg_score', 0):.1f}
+        - Recent Form: {', '.join(advanced_stats.get('away_team_stats', {}).get('recent_form', []))}
+        - High Scoring Games: {advanced_stats.get('away_team_stats', {}).get('high_scoring_games', 0)}
+        - Low Scoring Games: {advanced_stats.get('away_team_stats', {}).get('low_scoring_games', 0)}
+        
+        === BROWNLOW VOTE ANALYSIS ===
+        
+        {home_team.name} Top Players (2024 Brownlow Votes):
+        {', '.join([f"{player[0]} ({player[1]} votes)" for player in home_brownlow.get('top_players', [])[:3]])}
+        
+        {away_team.name} Top Players (2024 Brownlow Votes):
+        {', '.join([f"{player[0]} ({player[1]} votes)" for player in away_brownlow.get('top_players', [])[:3]])}
+        
+        === RECENT FORM ===
+        
         {home_team.name} Recent Form (Last 5 games):
         {', '.join([game['result'] for game in home_form])}
         
         {away_team.name} Recent Form (Last 5 games):
         {', '.join([game['result'] for game in away_form])}
         
-        Based on this historical data, predict:
-        1. The likely winner
-        2. Predicted final scores
-        3. Confidence level (0-100%)
-        4. Key factors influencing the prediction
-        5. Betting recommendation (if any)
+        === AI PREDICTION REQUEST ===
+        
+        Based on this comprehensive historical data including database statistics, enhanced JSON context, and Brownlow vote analysis, provide a detailed prediction:
+        
+        1. The likely winner and reasoning
+        2. Predicted final scores with confidence intervals
+        3. Confidence level (0-100%) based on data consistency
+        4. Key factors influencing the prediction (consider both database and JSON insights)
+        5. Betting recommendation with risk assessment
+        6. Player performance expectations based on Brownlow analysis
         
         Provide your analysis in JSON format with the following structure:
         {{
@@ -247,10 +453,12 @@ class AFLPredictor:
             "predicted_home_score": integer,
             "predicted_away_score": integer,
             "confidence_score": float (0.0-1.0),
-            "reasoning": "detailed explanation",
-            "key_factors": ["factor1", "factor2", "factor3"],
+            "reasoning": "detailed explanation incorporating all data sources",
+            "key_factors": ["factor1", "factor2", "factor3", "factor4"],
             "betting_recommendation": "home", "away", "draw", or "none",
-            "bet_confidence": float (0.0-1.0)
+            "bet_confidence": float (0.0-1.0),
+            "risk_assessment": "low", "medium", or "high",
+            "player_insights": "key player performance expectations"
         }}
         """
         
@@ -290,8 +498,27 @@ class AFLPredictor:
             }
     
     def _create_prediction_object(self, game: Game, prediction_data: Dict) -> Prediction:
-        """Create Prediction object from AI response"""
+        """Create Prediction object from AI response with enhanced fields"""
         predicted_winner_id = game.home_team_id if prediction_data.get('predicted_winner') == 'home' else game.away_team_id
+        
+        # Prepare factors considered
+        factors = prediction_data.get('key_factors', [])
+        if isinstance(factors, list):
+            factors_str = ','.join(factors)
+        else:
+            factors_str = str(factors)
+        
+        # Add enhanced insights
+        enhanced_reasoning = prediction_data.get('reasoning', '')
+        risk_assessment = prediction_data.get('risk_assessment', 'medium')
+        player_insights = prediction_data.get('player_insights', '')
+        
+        # Combine reasoning with enhanced insights
+        full_reasoning = f"{enhanced_reasoning}"
+        if player_insights:
+            full_reasoning += f"\n\nPlayer Insights: {player_insights}"
+        if risk_assessment != 'medium':
+            full_reasoning += f"\n\nRisk Assessment: {risk_assessment.upper()}"
         
         return Prediction(
             game_id=game.id,

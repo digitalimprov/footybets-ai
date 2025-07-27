@@ -97,7 +97,7 @@ const Navbar = () => {
               </div>
             ) : (
               <Link
-                to={urlStructure.admin.login}
+                to="/login"
                 className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors duration-200"
               >
                 Login

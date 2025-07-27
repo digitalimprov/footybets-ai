@@ -48,15 +48,13 @@ async def get_predictions(
     db: Session = Depends(get_db)
 ):
     """Get AI predictions with optional filtering"""
-    query = db.query(Prediction).join(Game).join(
-        Team, Game.home_team_id == Team.id
-    ).join(Team, Game.away_team_id == Team.id)
+    query = db.query(Prediction).join(Game)
     
     if game_id:
         query = query.filter(Prediction.game_id == game_id)
     
     if season:
-        query = query.join(Game).filter(Game.season == season)
+        query = query.filter(Game.season == season)
     
     predictions = query.order_by(Prediction.prediction_date.desc()).limit(limit).all()
     

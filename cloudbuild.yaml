@@ -43,7 +43,7 @@ steps:
 
   # Build and deploy frontend
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/footybets-frontend', './frontend']
+    args: ['build', '--build-arg', 'REACT_APP_API_URL=https://footybets-backend-wlbnzevhqa-uc.a.run.app', '-t', 'gcr.io/$PROJECT_ID/footybets-frontend', './frontend']
     dir: '.'
   
   - name: 'gcr.io/cloud-builders/docker'
