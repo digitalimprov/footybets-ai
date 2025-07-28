@@ -74,11 +74,11 @@ fi
 
 # Build with correct environment variable
 print_status "Building frontend..."
-REACT_APP_API_URL=https://footybets-backend-wlbnzevhqa-uc.a.run.app npm run build
+REACT_APP_API_URL=https://footybets-backend-818397187963.us-central1.run.app npm run build
 
 # Verify the build contains correct API URL
 print_status "Verifying build contains correct API URL..."
-if grep -q "footybets-backend-wlbnzevhqa-uc.a.run.app" build/static/js/*.js; then
+  if grep -q "footybets-backend-818397187963.us-central1.run.app" build/static/js/*.js; then
     print_success "Frontend build contains correct API URL"
 else
     print_warning "Could not verify API URL in build (this might be normal)"
@@ -128,7 +128,7 @@ if [ $? -eq 0 ]; then
     
     # Test the predictions endpoint
     print_status "Testing predictions endpoint..."
-    RESPONSE=$(curl -s -w "%{http_code}" "https://footybets-backend-wlbnzevhqa-uc.a.run.app/api/predictions/?limit=5" -H "Origin: https://footybets.ai")
+    RESPONSE=$(curl -s -w "%{http_code}" "https://footybets-backend-818397187963.us-central1.run.app/api/predictions/?limit=5" -H "Origin: https://footybets.ai")
     HTTP_CODE="${RESPONSE: -3}"
     RESPONSE_BODY="${RESPONSE%???}"
     

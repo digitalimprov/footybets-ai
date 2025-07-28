@@ -41,7 +41,7 @@ if settings.environment == "production":
             "api.footybets.ai",
             "footybets-backend-818397187963.us-central1.run.app",
             "footybets-frontend-818397187963.us-central1.run.app",
-            "footybets-backend-wlbnzevhqa-uc.a.run.app",
+            "footybets-backend-818397187963.us-central1.run.app",
             "footybets-frontend-wlbnzevhqa-uc.a.run.app",
             "*.run.app"  # Allow all Cloud Run URLs
         ]

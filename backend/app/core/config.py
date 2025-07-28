@@ -60,7 +60,7 @@ class Settings(BaseSettings):
         "https://footybets-frontend-818397187963.us-central1.run.app",
         "https://footybets-backend-818397187963.us-central1.run.app",
         "https://footybets-frontend-wlbnzevhqa-uc.a.run.app",
-        "https://footybets-backend-wlbnzevhqa-uc.a.run.app"
+        "https://footybets-backend-818397187963.us-central1.run.app"
     ]
     
     # Security headers
