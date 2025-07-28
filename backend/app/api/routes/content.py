@@ -151,6 +151,7 @@ async def generate_team_preview(
         raise HTTPException(status_code=500, detail=f"Error generating team preview: {str(e)}")
 
 # Content management endpoints
+@router.get("", response_model=ContentListResponse)
 @router.get("/", response_model=ContentListResponse)
 async def get_content(
     content_type: Optional[str] = Query(None, description="Filter by content type"),
