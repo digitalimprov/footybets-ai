@@ -43,7 +43,7 @@ steps:
 
   # Build and deploy frontend
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '--build-arg', 'REACT_APP_API_URL=https://api.footybets.ai', '-t', 'gcr.io/$PROJECT_ID/footybets-frontend', './frontend']
+    args: ['build', '--build-arg', 'REACT_APP_API_URL=https://footybets-backend-818397187963.us-central1.run.app', '-t', 'gcr.io/$PROJECT_ID/footybets-frontend', './frontend']
     dir: '.'
   
   - name: 'gcr.io/cloud-builders/docker'
@@ -71,7 +71,7 @@ steps:
       - '--max-instances'
       - '5'
       - '--set-env-vars'
-      - 'REACT_APP_API_URL=https://api.footybets.ai'
+      - 'REACT_APP_API_URL=https://footybets-backend-818397187963.us-central1.run.app'
 
   # Update Cloud Storage with Brownlow content
   - name: 'gcr.io/cloud-builders/gsutil'
