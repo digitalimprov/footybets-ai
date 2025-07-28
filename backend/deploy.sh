@@ -18,15 +18,15 @@ if [ -z "$FOOTYBETS_USER_PASSWORD" ]; then
 fi
 
 export DATABASE_URL="postgresql://footybets_user:${FOOTYBETS_USER_PASSWORD}@34.69.151.218:5432/footybets"
-export SECRET_KEY="your-production-secret-key-here"
-export API_SECRET_KEY="your-production-api-secret-key-here"
+export SECRET_KEY="fW0a6njr3OV6P3L-mc2fz5Avby7Bk8F6eOqf5wIxRdA"
+export API_SECRET_KEY="1wwutzADTGrzDA5-FVPUXJnI-Xoky9wrGSmUgQf1hz8"
 
 # Deploy to Cloud Run with PostgreSQL configuration
 gcloud run deploy footybets-backend \
   --source . \
   --region=us-central1 \
   --allow-unauthenticated \
-  --set-env-vars="ENVIRONMENT=production,DATABASE_URL=postgresql://footybets_user:${FOOTYBETS_USER_PASSWORD}@34.69.151.218:5432/footybets,SECRET_KEY=your-production-secret-key-here,API_SECRET_KEY=your-production-api-secret-key-here" \
+  --set-env-vars="ENVIRONMENT=production,DATABASE_URL=postgresql://footybets_user:${FOOTYBETS_USER_PASSWORD}@34.69.151.218:5432/footybets,SECRET_KEY=fW0a6njr3OV6P3L-mc2fz5Avby7Bk8F6eOqf5wIxRdA,API_SECRET_KEY=1wwutzADTGrzDA5-FVPUXJnI-Xoky9wrGSmUgQf1hz8" \
   --memory=2Gi \
   --cpu=2 \
   --timeout=300 \
