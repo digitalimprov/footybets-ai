@@ -3,20 +3,19 @@ import axios from 'axios';
 // Determine API base URL
 let API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
-// In production, ensure we're using HTTPS
-if (process.env.NODE_ENV === 'production' && !API_BASE_URL.startsWith('https://')) {
-  // If we're in production and the URL doesn't start with https, try to fix it
-  if (API_BASE_URL.startsWith('http://')) {
-    API_BASE_URL = API_BASE_URL.replace('http://', 'https://');
-  }
+// Force HTTPS in production and ensure correct backend URL
+if (process.env.NODE_ENV === 'production') {
+  // Use the correct Cloud Run backend URL
+  API_BASE_URL = 'https://footybets-backend-818397187963.us-central1.run.app';
+} else if (API_BASE_URL.startsWith('http://')) {
+  // In development, convert to HTTPS if needed
+  API_BASE_URL = API_BASE_URL.replace('http://', 'https://');
 }
 
 // Debug logging
-if (process.env.NODE_ENV === 'development') {
-  console.log('API Base URL:', API_BASE_URL);
-  console.log('Environment:', process.env.NODE_ENV);
-  console.log('REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
-}
+console.log('API Base URL:', API_BASE_URL);
+console.log('Environment:', process.env.NODE_ENV);
+console.log('REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
 
 // Create axios instance
 const api = axios.create({
