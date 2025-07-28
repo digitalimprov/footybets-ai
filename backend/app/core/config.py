@@ -4,7 +4,7 @@ import secrets
 
 class Settings(BaseSettings):
     # Database
-    database_url: str = "sqlite:///./footybets.db"
+    database_url: str = "postgresql://footybets_user:YOUR_PASSWORD_HERE@34.69.151.218:5432/footybets"
 
     # Google Gemini API
     gemini_api_key: Optional[str] = None

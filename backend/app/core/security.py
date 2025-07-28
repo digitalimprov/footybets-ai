@@ -2,6 +2,7 @@ import os
 import secrets
 import hashlib
 import hmac
+import re
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 from cryptography.fernet import Fernet
@@ -40,6 +41,42 @@ SECURITY_HEADERS = {
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
 }
+
+def validate_password_strength(password: str) -> bool:
+    """Validate password meets security requirements"""
+    errors = []
+    
+    if len(password) < 8:
+        errors.append("Password must be at least 8 characters long")
+    
+    if not re.search(r'[A-Z]', password):
+        errors.append("Password must contain at least one uppercase letter")
+    
+    if not re.search(r'[a-z]', password):
+        errors.append("Password must contain at least one lowercase letter")
+    
+    if not re.search(r'[0-9]', password):
+        errors.append("Password must contain at least one number")
+    
+    if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+        errors.append("Password must contain at least one special character")
+    
+    # Check for common weak passwords
+    weak_passwords = [
+        'password', '123456', 'qwerty', 'admin', 'footybets',
+        'football', 'afl', 'betting', 'predictions'
+    ]
+    if password.lower() in weak_passwords:
+        errors.append("Password cannot be a common weak password")
+    
+    # Check for repeated characters
+    if re.search(r'(.)\1{2,}', password):
+        errors.append("Password cannot contain more than 2 repeated characters")
+    
+    if errors:
+        raise ValueError("; ".join(errors))
+    
+    return True
 
 class SecurityManager:
     """Centralized security management for the application."""
@@ -82,136 +119,176 @@ class SecurityManager:
         """Generate a cryptographically secure token."""
         return secrets.token_urlsafe(length)
     
-    def create_access_token(self, data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
-        """Create a JWT access token."""
-        to_encode = data.copy()
-        if expires_delta:
-            expire = datetime.utcnow() + expires_delta
-        else:
-            expire = datetime.utcnow() + timedelta(minutes=JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
+    def create_user_with_secure_password(self, db: Session, user_data: dict) -> User:
+        """Create user with password validation"""
+        # Validate password strength
+        validate_password_strength(user_data['password'])
         
-        to_encode.update({"exp": expire, "type": "access"})
-        encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=JWT_ALGORITHM)
-        return encoded_jwt
+        # Hash password
+        hashed_password = self.hash_password(user_data['password'])
+        
+        # Create user
+        user = User(
+            email=user_data['email'],
+            username=user_data['username'],
+            hashed_password=hashed_password,
+            is_active=True,
+            is_verified=False,
+            roles=["user"],
+            permissions=["read:own", "write:own"],
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow()
+        )
+        
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        
+        # Log security event
+        self.log_security_event(
+            user_id=user.id,
+            action="user_created",
+            details=f"User {user.email} created with secure password",
+            ip_address=user_data.get('ip_address', 'unknown')
+        )
+        
+        return user
     
-    def create_refresh_token(self, data: Dict[str, Any]) -> str:
-        """Create a JWT refresh token."""
-        to_encode = data.copy()
-        expire = datetime.utcnow() + timedelta(days=JWT_REFRESH_TOKEN_EXPIRE_DAYS)
-        to_encode.update({"exp": expire, "type": "refresh"})
-        encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=JWT_ALGORITHM)
-        return encoded_jwt
+    def change_password_with_validation(self, db: Session, user: User, new_password: str, current_password: str) -> bool:
+        """Change user password with validation"""
+        # Verify current password
+        if not self.verify_password(current_password, user.hashed_password):
+            raise ValueError("Current password is incorrect")
+        
+        # Validate new password strength
+        validate_password_strength(new_password)
+        
+        # Check if new password is same as old password
+        if self.verify_password(new_password, user.hashed_password):
+            raise ValueError("New password must be different from current password")
+        
+        # Hash new password
+        new_hashed_password = self.hash_password(new_password)
+        
+        # Update user
+        user.hashed_password = new_hashed_password
+        user.last_password_change = datetime.utcnow()
+        user.updated_at = datetime.utcnow()
+        
+        db.commit()
+        
+        # Log security event
+        self.log_security_event(
+            user_id=user.id,
+            action="password_changed",
+            details="Password changed successfully",
+            ip_address="system"
+        )
+        
+        return True
     
-    def verify_token(self, token: str) -> Dict[str, Any]:
-        """Verify and decode a JWT token."""
+    def log_security_event(self, user_id: int, action: str, details: str, ip_address: str):
+        """Log security events for audit purposes"""
         try:
-            payload = jwt.decode(token, settings.secret_key, algorithms=[JWT_ALGORITHM])
-            return payload
-        except jwt.ExpiredSignatureError:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token has expired",
-                headers={"WWW-Authenticate": "Bearer"},
+            from app.models.security_log import SecurityLog
+            
+            security_log = SecurityLog(
+                user_id=user_id,
+                action=action,
+                details=details,
+                ip_address=ip_address,
+                created_at=datetime.utcnow()
             )
-        except jwt.JWTError:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Could not validate credentials",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+            
+            # This would typically be done in a database session
+            # For now, we'll just log it
+            logger.info(f"Security Event: {action} - {details} - User: {user_id} - IP: {ip_address}")
+            
+        except Exception as e:
+            logger.error(f"Failed to log security event: {e}")
     
-    def encrypt_sensitive_data(self, data: str) -> str:
-        """Encrypt sensitive data."""
-        return self.cipher_suite.encrypt(data.encode()).decode()
-    
-    def decrypt_sensitive_data(self, encrypted_data: str) -> str:
-        """Decrypt sensitive data."""
-        return self.cipher_suite.decrypt(encrypted_data.encode()).decode()
-    
-    def generate_api_key(self) -> str:
-        """Generate a secure API key."""
-        return f"fb_{secrets.token_urlsafe(32)}"
-    
-    def hash_api_key(self, api_key: str) -> str:
-        """Hash an API key for storage."""
-        return hashlib.sha256(api_key.encode()).hexdigest()
-    
-    def check_rate_limit(self, identifier: str, max_requests: int = 100, window_seconds: int = 3600) -> bool:
-        """Check if a request is within rate limits."""
+    def check_rate_limit(self, identifier: str, max_requests: int = 10, window_seconds: int = 300) -> bool:
+        """Check if request is within rate limits"""
         now = datetime.utcnow()
-        if identifier not in self.rate_limit_store:
+        window_start = now - timedelta(seconds=window_seconds)
+        
+        # Clean old entries
+        if identifier in self.rate_limit_store:
+            self.rate_limit_store[identifier] = [
+                timestamp for timestamp in self.rate_limit_store[identifier]
+                if timestamp > window_start
+            ]
+        else:
             self.rate_limit_store[identifier] = []
         
-        # Remove old requests outside the window
-        self.rate_limit_store[identifier] = [
-            req_time for req_time in self.rate_limit_store[identifier]
-            if (now - req_time).seconds < window_seconds
-        ]
-        
+        # Check if limit exceeded
         if len(self.rate_limit_store[identifier]) >= max_requests:
             return False
         
+        # Add current request
         self.rate_limit_store[identifier].append(now)
         return True
     
-    def track_failed_login(self, identifier: str) -> int:
-        """Track failed login attempts and return current count."""
-        if identifier not in self.failed_attempts:
-            self.failed_attempts[identifier] = {"count": 0, "first_attempt": datetime.utcnow()}
+    def check_failed_login_attempts(self, identifier: str, max_attempts: int = 5) -> bool:
+        """Check if user is locked due to failed login attempts"""
+        now = datetime.utcnow()
         
-        self.failed_attempts[identifier]["count"] += 1
-        return self.failed_attempts[identifier]["count"]
+        if identifier in self.failed_attempts:
+            attempts = self.failed_attempts[identifier]
+            # Clean old attempts
+            attempts = [timestamp for timestamp in attempts if timestamp > now - timedelta(minutes=15)]
+            self.failed_attempts[identifier] = attempts
+            
+            if len(attempts) >= max_attempts:
+                return False
+        
+        return True
     
-    def reset_failed_login(self, identifier: str):
-        """Reset failed login attempts for an identifier."""
+    def record_failed_login(self, identifier: str):
+        """Record a failed login attempt"""
+        now = datetime.utcnow()
+        
+        if identifier not in self.failed_attempts:
+            self.failed_attempts[identifier] = []
+        
+        self.failed_attempts[identifier].append(now)
+        
+        # Log security event
+        self.log_security_event(
+            user_id=0,  # Unknown user
+            action="failed_login",
+            details=f"Failed login attempt for {identifier}",
+            ip_address=identifier
+        )
+    
+    def clear_failed_attempts(self, identifier: str):
+        """Clear failed login attempts for successful login"""
         if identifier in self.failed_attempts:
             del self.failed_attempts[identifier]
     
-    def is_account_locked(self, identifier: str, max_attempts: int = 5, lockout_minutes: int = 15) -> bool:
-        """Check if an account is locked due to failed login attempts."""
-        if identifier not in self.failed_attempts:
-            return False
-        
-        failed_data = self.failed_attempts[identifier]
-        if failed_data["count"] >= max_attempts:
-            time_since_first = datetime.utcnow() - failed_data["first_attempt"]
-            if time_since_first.total_seconds() < (lockout_minutes * 60):
-                return True
-        
-        return False
+    def is_account_locked(self, identifier: str) -> bool:
+        """Check if an account is locked due to failed login attempts"""
+        return not self.check_failed_login_attempts(identifier)
     
-    def sanitize_input(self, data: str) -> str:
-        """Sanitize user input to prevent injection attacks."""
-        # Remove potentially dangerous characters
-        dangerous_chars = ['<', '>', '"', "'", '&', ';', '(', ')', '{', '}']
-        for char in dangerous_chars:
-            data = data.replace(char, '')
-        return data.strip()
+    def track_failed_login(self, identifier: str):
+        """Track a failed login attempt"""
+        self.record_failed_login(identifier)
     
-    def validate_password_strength(self, password: str) -> Dict[str, Any]:
-        """Validate password strength."""
-        errors = []
-        
-        if len(password) < 8:
-            errors.append("Password must be at least 8 characters long")
-        
-        if not any(c.isupper() for c in password):
-            errors.append("Password must contain at least one uppercase letter")
-        
-        if not any(c.islower() for c in password):
-            errors.append("Password must contain at least one lowercase letter")
-        
-        if not any(c.isdigit() for c in password):
-            errors.append("Password must contain at least one number")
-        
-        if not any(c in "!@#$%^&*()_+-=[]{}|;:,.<>?" for c in password):
-            errors.append("Password must contain at least one special character")
-        
-        return {
-            "valid": len(errors) == 0,
-            "errors": errors,
-            "strength": "strong" if len(errors) == 0 else "weak"
-        }
+    def validate_password_strength(self, password: str) -> dict:
+        """Validate password meets security requirements"""
+        try:
+            validate_password_strength(password)
+            return {"valid": True, "errors": []}
+        except ValueError as e:
+            return {"valid": False, "errors": [str(e)]}
+    
+    def generate_api_key(self) -> str:
+        """Generate a new API key."""
+        return self.generate_secure_token(32)
+    
+    def hash_api_key(self, api_key: str) -> str:
+        """Hash an API key for storage."""
+        return self.hash_password(api_key)
     
     def create_session(self, user_id: int, session_data: Dict[str, Any] = None) -> str:
         """Create a new user session."""
@@ -243,6 +320,48 @@ class SecurityManager:
         """Invalidate a user session."""
         if session_id in self.active_sessions:
             del self.active_sessions[session_id]
+    
+    def create_access_token(self, data: dict, expires_delta: Optional[timedelta] = None) -> str:
+        """Create a JWT access token."""
+        to_encode = data.copy()
+        if expires_delta:
+            expire = datetime.utcnow() + expires_delta
+        else:
+            expire = datetime.utcnow() + timedelta(minutes=JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
+        
+        to_encode.update({"exp": expire, "type": "access"})
+        encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=JWT_ALGORITHM)
+        return encoded_jwt
+    
+    def create_refresh_token(self, data: dict, expires_delta: Optional[timedelta] = None) -> str:
+        """Create a JWT refresh token."""
+        to_encode = data.copy()
+        if expires_delta:
+            expire = datetime.utcnow() + expires_delta
+        else:
+            expire = datetime.utcnow() + timedelta(days=JWT_REFRESH_TOKEN_EXPIRE_DAYS)
+        
+        to_encode.update({"exp": expire, "type": "refresh"})
+        encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=JWT_ALGORITHM)
+        return encoded_jwt
+    
+    def verify_token(self, token: str) -> dict:
+        """Verify and decode a JWT token."""
+        try:
+            payload = jwt.decode(token, settings.secret_key, algorithms=[JWT_ALGORITHM])
+            return payload
+        except jwt.ExpiredSignatureError:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token has expired",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        except (jwt.InvalidTokenError, jwt.DecodeError, jwt.InvalidSignatureError):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
 
 # Global security manager instance
 security_manager = SecurityManager()
