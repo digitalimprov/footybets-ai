@@ -1,58 +1,43 @@
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
-// Determine API base URL
-let API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-
-// Force HTTPS in production and ensure correct backend URL
-if (process.env.NODE_ENV === 'production') {
-  // Use the correct Cloud Run backend URL with HTTPS
-  API_BASE_URL = 'https://footybets-backend-818397187963.us-central1.run.app';
-} else {
-  // In development, ensure HTTPS
-  if (API_BASE_URL.startsWith('http://')) {
-    API_BASE_URL = API_BASE_URL.replace('http://', 'https://');
-  }
-}
-
-// Always ensure HTTPS for security
-if (!API_BASE_URL.startsWith('https://')) {
-  API_BASE_URL = API_BASE_URL.replace('http://', 'https://');
-}
-
-// Debug logging
-console.log('API Base URL:', API_BASE_URL);
-console.log('Environment:', process.env.NODE_ENV);
-console.log('REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
-
-// Create axios instance
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 30000,
+// API Configuration - Australian deployment
+const API_CONFIG = {
+  // Primary API base URL (Australian region)
+  baseURL: process.env.NODE_ENV === 'production' 
+    ? 'https://footybets-backend-818397187963.australia-southeast1.run.app/api'
+    : 'http://localhost:8000/api',
+  
+  // Fallback URLs for high availability
+  fallbackURLs: [
+    'https://api.footybets.ai/api',
+    'https://footybets-backend-818397187963.us-central1.run.app/api'
+  ],
+  
+  timeout: 10000, // 10 seconds - good for Australian connectivity
   headers: {
     'Content-Type': 'application/json',
-  },
-  // Force HTTPS and handle redirects properly
-  maxRedirects: 5,
-  validateStatus: function (status) {
-    return status >= 200 && status < 400; // Accept redirects
-  },
-});
+    'Accept': 'application/json',
+    'X-Region': 'australia-southeast1',
+    'X-Timezone': 'Australia/Sydney'
+  }
+};
 
-// Request interceptor
-api.interceptors.request.use(
+// Create axios instance with Australian-optimized settings
+const apiClient = axios.create(API_CONFIG);
+
+// Request interceptor - add auth token and Australian locale
+apiClient.interceptors.request.use(
   (config) => {
-    // Add auth token if available
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    // Ensure HTTPS for all requests
-    if (config.url && config.url.startsWith('http://')) {
-      config.url = config.url.replace('http://', 'https://');
-    }
+    // Add Australian locale and timezone
+    config.headers['Accept-Language'] = 'en-AU';
+    config.headers['X-User-Timezone'] = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Australia/Sydney';
     
-    console.log('Making API request to:', config.baseURL + config.url);
     return config;
   },
   (error) => {
@@ -60,274 +45,157 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor
-api.interceptors.response.use(
+// Response interceptor with Australian error handling
+apiClient.interceptors.response.use(
   (response) => {
-    return response.data;
+    return response;
   },
-  (error) => {
-    // Enhanced error logging for debugging
-    if (process.env.NODE_ENV === 'development') {
-      console.error('API Error Details:', {
-        message: error.message,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        url: error.config?.url,
-        method: error.config?.method,
-        headers: error.config?.headers,
-        data: error.response?.data
-      });
-    }
+  async (error) => {
+    const originalRequest = error.config;
     
-    // Handle authentication errors
-    if (error.response?.status === 401) {
-      console.log('Authentication error - clearing tokens');
+    // Handle 401 errors (authentication)
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      // Clear invalid tokens
       localStorage.removeItem('accessToken');
       localStorage.removeItem('userData');
-      // You might want to redirect to login here
+      
+      // Redirect to login for Australian users
+      if (window.location.pathname !== '/login') {
+        toast.error('Session expired. Please log in again.');
+        window.location.href = '/login';
+      }
+      
+      return Promise.reject(error);
     }
     
-    throw error;
+    // Handle network errors with Australian context
+    if (!error.response) {
+      toast.error('Network error. Please check your internet connection.');
+      console.error('Network Error:', error.message);
+    }
+    
+    // Handle server errors with Australian support contact
+    if (error.response?.status >= 500) {
+      toast.error('Server error. Our Australian support team has been notified.');
+      console.error('Server Error:', error.response);
+    }
+    
+    return Promise.reject(error);
   }
 );
 
-export const apiService = {
-  // Authentication API
-  login: async (email, password) => {
-    return api.post('/api/auth/login', { email, password });
+// API service methods optimized for Australian AFL data
+const apiService = {
+  // Authentication endpoints
+  auth: {
+    login: (credentials) => apiClient.post('/auth/login', credentials),
+    register: (userData) => apiClient.post('/auth/register', userData),
+    logout: () => apiClient.post('/auth/logout'),
+    refreshToken: () => apiClient.post('/auth/refresh'),
+    forgotPassword: (email) => apiClient.post('/auth/forgot-password', { email }),
+    resetPassword: (data) => apiClient.post('/auth/reset-password', data),
+    verifyEmail: (token) => apiClient.post('/auth/verify-email', { token }),
+    verifyToken: () => apiClient.get('/auth/verify-token')
   },
 
-  register: async (userData) => {
-    return api.post('/api/auth/register', userData);
+  // AFL predictions (Australian timezone optimized)
+  predictions: {
+    getAll: (params = {}) => apiClient.get('/predictions', { 
+      params: { 
+        ...params, 
+        timezone: 'Australia/Sydney',
+        currency: 'AUD'
+      } 
+    }),
+    getById: (id) => apiClient.get(`/predictions/${id}`),
+    create: (data) => apiClient.post('/predictions', data),
+    update: (id, data) => apiClient.put(`/predictions/${id}`, data),
+    delete: (id) => apiClient.delete(`/predictions/${id}`),
+    generate: (gameData) => apiClient.post('/predictions/generate', gameData),
+    updateAccuracy: (id, accuracy) => apiClient.put(`/predictions/${id}/accuracy`, { accuracy })
   },
 
-  logout: async () => {
-    return api.post('/api/auth/logout');
+  // AFL games and fixtures (Australian focused)
+  games: {
+    getAll: (params = {}) => apiClient.get('/games', { 
+      params: { 
+        ...params,
+        timezone: 'Australia/Sydney'
+      } 
+    }),
+    getById: (id) => apiClient.get(`/games/${id}`),
+    getUpcoming: () => apiClient.get('/games/upcoming'),
+    getByRound: (round, season) => apiClient.get(`/games/round/${round}`, { 
+      params: { season, timezone: 'Australia/Sydney' } 
+    }),
+    getByTeam: (teamId) => apiClient.get(`/games/team/${teamId}`)
   },
 
-  getCurrentUser: async () => {
-    return api.get('/api/auth/me');
+  // Analytics with Australian market focus
+  analytics: {
+    getOverview: () => apiClient.get('/analytics/overview'),
+    getPerformance: () => apiClient.get('/analytics/performance'),
+    getAccuracy: () => apiClient.get('/analytics/accuracy'),
+    getTrends: () => apiClient.get('/analytics/trends'),
+    getTeamStats: (teamId) => apiClient.get(`/analytics/teams/${teamId}`),
+    getMarketData: () => apiClient.get('/analytics/market', {
+      params: { region: 'australia', currency: 'AUD' }
+    })
   },
 
-  refreshToken: async (refreshToken) => {
-    return api.post('/api/auth/refresh', { refresh_token: refreshToken });
+  // User management
+  users: {
+    getProfile: () => apiClient.get('/users/profile'),
+    updateProfile: (data) => apiClient.put('/users/profile', data),
+    changePassword: (data) => apiClient.put('/users/change-password', data),
+    deleteAccount: () => apiClient.delete('/users/account'),
+    getSubscription: () => apiClient.get('/users/subscription'),
+    updateSubscription: (plan) => apiClient.put('/users/subscription', { plan })
   },
 
-  requestPasswordReset: async (email) => {
-    return api.post('/api/auth/password-reset', { email });
+  // Admin endpoints (Australian region)
+  admin: {
+    getUsers: () => apiClient.get('/admin/users'),
+    getSystemStats: () => apiClient.get('/admin/system-stats'),
+    getSecurityLogs: () => apiClient.get('/admin/security-logs'),
+    getContent: () => apiClient.get('/admin/content'),
+    updateUser: (id, data) => apiClient.put(`/admin/users/${id}`, data),
+    deleteUser: (id) => apiClient.delete(`/admin/users/${id}`),
+    generateContent: (data) => apiClient.post('/admin/generate-content', data)
   },
 
-  confirmPasswordReset: async (token, newPassword) => {
-    return api.post('/api/auth/password-reset/confirm', { token, new_password: newPassword });
+  // Content and tips (Australian AFL focus)
+  content: {
+    getTips: (params = {}) => apiClient.get('/content/tips', { 
+      params: { 
+        ...params,
+        region: 'australia',
+        league: 'afl'
+      } 
+    }),
+    getArticles: () => apiClient.get('/content/articles'),
+    getById: (id) => apiClient.get(`/content/${id}`),
+    create: (data) => apiClient.post('/content', data),
+    update: (id, data) => apiClient.put(`/content/${id}`, data),
+    delete: (id) => apiClient.delete(`/content/${id}`)
   },
 
-  verifyEmail: async (token) => {
-    return api.post(`/api/auth/verify-email/${token}`);
-  },
-
-  resendVerification: async (email) => {
-    return api.post('/api/auth/resend-verification', { email });
-  },
-
-  // Games API
-  getGames: async (params = {}) => {
-    return api.get('/api/games', { params });
-  },
-
-  getUpcomingGames: async (days = 7) => {
-    return api.get('/api/games/upcoming', { params: { days } });
-  },
-
-  getGame: async (gameId) => {
-    return api.get(`/api/games/${gameId}`);
-  },
-
-  // Predictions API
-  getPredictions: async (limit = 50, params = {}) => {
-    return api.get('/api/predictions', { params: { limit, ...params } });
-  },
-
-  getUpcomingPredictions: async (days = 7) => {
-    return api.get('/api/predictions/upcoming', { params: { days } });
-  },
-
-  getPrediction: async (predictionId) => {
-    return api.get(`/api/predictions/${predictionId}`);
-  },
-
-  getPredictionByGame: async (gameId) => {
-    return api.get('/api/predictions', { params: { game_id: gameId } });
-  },
-
-  generatePredictions: async (days = 7) => {
-    return api.post('/api/predictions/generate', null, { params: { days } });
-  },
-
-  updatePredictionAccuracy: async () => {
-    return api.post('/api/predictions/update-accuracy');
-  },
-
-  // Analytics API
-  getAnalyticsOverview: async (period = 'all', season = null) => {
-    const params = { period };
-    if (season) params.season = season;
-    return api.get('/api/analytics/overview', { params });
-  },
-
-  getTeamPerformance: async (season = null, limit = 18) => {
-    const params = { limit };
-    if (season) params.season = season;
-    return api.get('/api/analytics/team-performance', { params });
-  },
-
-  getPredictionTrends: async (days = 30) => {
-    return api.get('/api/analytics/prediction-trends', { params: { days } });
-  },
-
-  generateAnalytics: async (periodType = 'weekly') => {
-    return api.post('/api/analytics/generate-analytics', null, { params: { period_type: periodType } });
-  },
-
-  // Scraping API
-  scrapeHistoricalData: async (startSeason = 2020, endSeason = 2024) => {
-    return api.post('/api/scraping/historical-data', null, { 
-      params: { start_season: startSeason, end_season: endSeason } 
-    });
-  },
-
-  scrapeSeason: async (season = 2024) => {
-    return api.post('/api/scraping/season', null, { params: { season } });
-  },
-
-  scrapeUpcomingGames: async () => {
-    return api.post('/api/scraping/upcoming-games');
-  },
-
-  getScrapingStatus: async () => {
-    return api.get('/api/scraping/status');
-  },
-
-  cleanupData: async () => {
-    return api.post('/api/scraping/cleanup');
-  },
-
-  // Health check
-  healthCheck: async () => {
-    return api.get('/health');
-  },
-
-  // Admin API
-  getSystemStats: async () => {
-    return api.get('/api/admin/system-stats');
-  },
-
-  getUsers: async (params = {}) => {
-    return api.get('/api/admin/users', { params });
-  },
-
-  getUser: async (userId) => {
-    return api.get(`/api/admin/users/${userId}`);
-  },
-
-  updateUser: async (userId, userData) => {
-    return api.put(`/api/admin/users/${userId}`, userData);
-  },
-
-  promoteUserToAdmin: async (userId) => {
-    return api.post(`/api/admin/users/${userId}/promote-admin`);
-  },
-
-  demoteUserFromAdmin: async (userId) => {
-    return api.post(`/api/admin/users/${userId}/demote-admin`);
-  },
-
-  upgradeUserSubscription: async (userId, tier, duration = 30) => {
-    return api.post(`/api/admin/users/${userId}/upgrade-subscription`, {
-      tier,
-      duration_days: duration
-    });
-  },
-
-  downgradeUserSubscription: async (userId) => {
-    return api.post(`/api/admin/users/${userId}/downgrade-subscription`);
-  },
-
-  unlockUserAccount: async (userId) => {
-    return api.post(`/api/admin/users/${userId}/unlock`);
-  },
-
-  getUserSessions: async (userId) => {
-    return api.get(`/api/admin/users/${userId}/sessions`);
-  },
-
-  terminateUserSession: async (userId, sessionId) => {
-    return api.delete(`/api/admin/users/${userId}/sessions/${sessionId}`);
-  },
-
-  getSecurityLogs: async (params = {}) => {
-    return api.get('/api/admin/security-logs', { params });
-  },
-
-  getAvailableRoles: async () => {
-    return api.get('/api/admin/roles');
-  },
-
-  // Content Management API
-  getContent: async (params = {}) => {
-    return api.get('/api/content', { params });
-  },
-
-  getTeams: async () => {
-    return api.get('/api/teams');
-  },
-
-  getFeaturedContent: async (limit = 5) => {
-    return api.get('/api/content/featured', { params: { limit } });
-  },
-
-  getContentById: async (contentId) => {
-    return api.get(`/api/content/${contentId}`);
-  },
-
-  getContentBySlug: async (slug) => {
-    return api.get(`/api/content/slug/${slug}`);
-  },
-
-  generateContent: async (contentData) => {
-    return api.post('/api/content/generate', contentData);
-  },
-
-  generateGameAnalysis: async (gameId) => {
-    return api.post(`/api/content/generate/game-analysis/${gameId}`);
-  },
-
-  generateTeamPreview: async (teamId, season = 2024) => {
-    return api.post(`/api/content/generate/team-preview/${teamId}`, null, { params: { season } });
-  },
-
-  updateContent: async (contentId, updates) => {
-    return api.put(`/api/content/${contentId}`, updates);
-  },
-
-  publishContent: async (contentId) => {
-    return api.post(`/api/content/${contentId}/publish`);
-  },
-
-  archiveContent: async (contentId) => {
-    return api.post(`/api/content/${contentId}/archive`);
-  },
-
-  deleteContent: async (contentId) => {
-    return api.delete(`/api/content/${contentId}`);
-  },
-
-  getContentTemplates: async () => {
-    return api.get('/api/content/templates');
-  },
-
-  getContentAnalytics: async (contentId, period = 'daily') => {
-    return api.get(`/api/content/${contentId}/analytics`, { params: { period } });
-  },
+  // Health check for Australian infrastructure
+  health: () => apiClient.get('/health'),
+  
+  // Region-specific utilities
+  utils: {
+    getAustralianTime: () => apiClient.get('/utils/time/australia'),
+    convertCurrency: (amount, from, to) => apiClient.get('/utils/currency/convert', {
+      params: { amount, from, to }
+    }),
+    getAFLTeams: () => apiClient.get('/utils/afl/teams'),
+    getAFLFixtures: (round, season) => apiClient.get('/utils/afl/fixtures', {
+      params: { round, season }
+    })
+  }
 };
 
 export default apiService; 

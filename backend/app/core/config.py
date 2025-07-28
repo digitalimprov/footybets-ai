@@ -1,29 +1,76 @@
 from pydantic_settings import BaseSettings
 from typing import Optional, List
 import secrets
+from pydantic import Field
 
 class Settings(BaseSettings):
-    # Database
-    database_url: str = "postgresql://footybets_user:YOUR_PASSWORD_HERE@34.69.151.218:5432/footybets"
-
-    # Google Gemini API
-    gemini_api_key: Optional[str] = None
-
-    # Scraping settings
-    scraping_delay: int = 1
-    user_agent: str = "Mozilla/5.0 (compatible; FootyBets/1.0)"
-
-    # API settings
-    api_secret_key: str = "temporary-secret-key-for-deployment"  # Will be overridden by env var
+    # Application settings
+    APP_NAME: str = "FootyBets AI"
+    APP_VERSION: str = "1.0.0"
+    DEBUG: bool = False
+    
+    # Regional settings - optimized for Australia
+    REGION: str = "australia-southeast1"
+    TIMEZONE: str = "Australia/Sydney"
+    
+    # Database settings (Australian instance)
+    DATABASE_URL: str = "postgresql://footybets_user:footybets_password@34.40.170.58:5432/footybets"
+    DATABASE_HOST: str = "34.40.170.58"
+    DATABASE_PORT: int = 5432
+    DATABASE_USER: str = "footybets_user"
+    DATABASE_PASSWORD: str = Field(default="", env="DATABASE_PASSWORD")
+    DATABASE_NAME: str = "footybets"
     
     # Security settings
-    secret_key: str = secrets.token_urlsafe(32)
-    encryption_key: str = secrets.token_urlsafe(32)
+    SECRET_KEY: str = Field(default="temp-secret", env="APP_SECRET_KEY")
+    API_SECRET_KEY: str = Field(default="temp-api-secret", env="API_SECRET_KEY")
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
-    # JWT settings
-    jwt_algorithm: str = "HS256"
-    jwt_access_token_expire_minutes: int = 30
-    jwt_refresh_token_expire_days: int = 7
+    # External APIs
+    GEMINI_API_KEY: str = Field(default="", env="GEMINI_API_KEY")
+    
+    # Google Cloud settings (Australian region)
+    GOOGLE_CLOUD_PROJECT: str = "footybets-ai"
+    GOOGLE_CLOUD_REGION: str = "australia-southeast1"
+    
+    # CORS settings - allow Australian and global access
+    CORS_ORIGINS: list[str] = [
+        "https://footybets.ai",
+        "https://www.footybets.ai",
+        "https://footybets-frontend-818397187963.australia-southeast1.run.app",
+        "http://localhost:3000",
+        "http://localhost:8080"
+    ]
+    
+    # API base URLs (Australian endpoints)
+    API_BASE_URL: str = "https://footybets-backend-818397187963.australia-southeast1.run.app"
+    FRONTEND_URL: str = "https://footybets-frontend-818397187963.australia-southeast1.run.app"
+    
+    # Rate limiting (per Australian time zones)
+    RATE_LIMIT_PER_MINUTE: int = 60
+    RATE_LIMIT_PER_HOUR: int = 1000
+    
+    # File uploads
+    MAX_FILE_SIZE: int = 10 * 1024 * 1024  # 10MB
+    UPLOAD_DIR: str = "/tmp/uploads"
+    
+    # Email settings (using Australian providers when possible)
+    SMTP_SERVER: str = Field(default="", env="SMTP_SERVER")
+    SMTP_PORT: int = Field(default=587, env="SMTP_PORT")
+    SMTP_USERNAME: str = Field(default="", env="SMTP_USERNAME")
+    SMTP_PASSWORD: str = Field(default="", env="SMTP_PASSWORD")
+    FROM_EMAIL: str = "noreply@footybets.ai"
+    
+    # Monitoring and logging
+    LOG_LEVEL: str = "INFO"
+    ENABLE_METRICS: bool = True
+    
+    # Australian AFL specific settings
+    AFL_SEASON_START: str = "March"
+    AFL_SEASON_END: str = "September"
+    DEFAULT_CURRENCY: str = "AUD"
+    DEFAULT_LOCALE: str = "en_AU"
     
     # Password settings
     password_min_length: int = 8
@@ -43,35 +90,14 @@ class Settings(BaseSettings):
     account_lockout_minutes: int = 15
     session_timeout_hours: int = 24
     
-    # Email settings
-    smtp_server: Optional[str] = None
-    smtp_port: int = 587
-    smtp_username: Optional[str] = None
-    smtp_password: Optional[str] = None
-    from_email: str = "noreply@footybets.ai"
-    from_name: str = "FootyBets.ai"
-    frontend_url: str = "https://footybets.ai"
+    # JWT settings
+    jwt_algorithm: str = "HS256"
+    jwt_access_token_expire_minutes: int = 30
+    jwt_refresh_token_expire_days: int = 7
     
-    # CORS settings
-    allowed_origins: List[str] = [
-        "https://footybets.ai",
-        "https://www.footybets.ai",
-        "https://api.footybets.ai",
-        "https://footybets-frontend-818397187963.us-central1.run.app",
-        "https://footybets-backend-wlbnzevhqa-uc.a.run.app",
-        "https://footybets-frontend-wlbnzevhqa-uc.a.run.app",
-        "https://footybets-backend-818397187963.us-central1.run.app"
-    ]
-    
-    # Security headers
-    enable_security_headers: bool = True
-    enable_hsts: bool = True
-    enable_csp: bool = True
-    
-    # Monitoring and logging
-    enable_sentry: bool = False
-    sentry_dsn: Optional[str] = None
-    log_level: str = "INFO"
+    # Scraping settings
+    scraping_delay: int = 1
+    user_agent: str = "Mozilla/5.0 (compatible; FootyBets/1.0)"
     
     # Redis (for rate limiting and caching)
     redis_url: Optional[str] = None
@@ -81,8 +107,16 @@ class Settings(BaseSettings):
     
     # Environment
     environment: str = "development"
-    debug: bool = False
-
+    
+    # Security headers
+    enable_security_headers: bool = True
+    enable_hsts: bool = True
+    enable_csp: bool = True
+    
+    # Monitoring and logging
+    enable_sentry: bool = False
+    sentry_dsn: Optional[str] = None
+    
     class Config:
         env_file = ".env"
         case_sensitive = False

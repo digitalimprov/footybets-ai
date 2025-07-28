@@ -22,7 +22,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
 // Maintenance mode configuration
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 // Maintenance mode component
 const MaintenanceMode = () => {
