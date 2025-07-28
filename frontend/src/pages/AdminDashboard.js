@@ -60,10 +60,10 @@ const AdminDashboard = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
-    if (user && user.is_admin) {
+    if (user && user.is_admin && !loading) {
       loadDashboardData();
     }
-  }, [user, activeTab]);
+  }, [user, activeTab, loading]);
 
   const loadDashboardData = async () => {
     try {
@@ -97,7 +97,13 @@ const AdminDashboard = () => {
       setSystemStats(stats);
     } catch (error) {
       console.error('Error loading system stats:', error);
-      toast.error('Failed to load system statistics');
+      if (error.response?.status === 401) {
+        toast.error('Authentication required. Please log in again.');
+        // Redirect to login
+        window.location.href = '/login';
+      } else {
+        toast.error('Failed to load system statistics');
+      }
     }
   };
 
@@ -113,7 +119,12 @@ const AdminDashboard = () => {
       setUsers(usersData);
     } catch (error) {
       console.error('Error loading users:', error);
-      toast.error('Failed to load users');
+      if (error.response?.status === 401) {
+        toast.error('Authentication required. Please log in again.');
+        window.location.href = '/login';
+      } else {
+        toast.error('Failed to load users');
+      }
     }
   };
 
