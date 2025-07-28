@@ -63,7 +63,9 @@ export const urlStructure = {
   admin: {
     login: '/admin/login',
     scraping: '/admin/scraping',
-    dashboard: '/admin/dashboard'
+    dashboard: '/admin/dashboard',
+    analytics: '/admin/analytics',
+    settings: '/admin/settings'
   }
 };
 

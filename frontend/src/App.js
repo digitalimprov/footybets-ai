@@ -16,6 +16,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminGenerateContent from './pages/AdminGenerateContent';
+import AdminSettings from './pages/AdminSettings';
+import AdminAnalytics from './pages/AdminAnalytics';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
@@ -102,6 +104,22 @@ function App() {
                   element={
                     <ProtectedRoute requireAdmin={true}>
                       <AdminGenerateContent />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/settings" 
+                  element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <AdminSettings />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/analytics" 
+                  element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <AdminAnalytics />
                     </ProtectedRoute>
                   } 
                 />

@@ -201,6 +201,62 @@ export const apiService = {
     return api.get('/health');
   },
 
+  // Admin API
+  getSystemStats: async () => {
+    return api.get('/api/admin/system-stats');
+  },
+
+  getUsers: async (params = {}) => {
+    return api.get('/api/admin/users', { params });
+  },
+
+  getUser: async (userId) => {
+    return api.get(`/api/admin/users/${userId}`);
+  },
+
+  updateUser: async (userId, userData) => {
+    return api.put(`/api/admin/users/${userId}`, userData);
+  },
+
+  promoteUserToAdmin: async (userId) => {
+    return api.post(`/api/admin/users/${userId}/promote-admin`);
+  },
+
+  demoteUserFromAdmin: async (userId) => {
+    return api.post(`/api/admin/users/${userId}/demote-admin`);
+  },
+
+  upgradeUserSubscription: async (userId, tier, duration = 30) => {
+    return api.post(`/api/admin/users/${userId}/upgrade-subscription`, {
+      tier,
+      duration_days: duration
+    });
+  },
+
+  downgradeUserSubscription: async (userId) => {
+    return api.post(`/api/admin/users/${userId}/downgrade-subscription`);
+  },
+
+  unlockUserAccount: async (userId) => {
+    return api.post(`/api/admin/users/${userId}/unlock`);
+  },
+
+  getUserSessions: async (userId) => {
+    return api.get(`/api/admin/users/${userId}/sessions`);
+  },
+
+  terminateUserSession: async (userId, sessionId) => {
+    return api.delete(`/api/admin/users/${userId}/sessions/${sessionId}`);
+  },
+
+  getSecurityLogs: async (params = {}) => {
+    return api.get('/api/admin/security-logs', { params });
+  },
+
+  getAvailableRoles: async () => {
+    return api.get('/api/admin/roles');
+  },
+
   // Content Management API
   getContent: async (params = {}) => {
     return api.get('/api/content', { params });
