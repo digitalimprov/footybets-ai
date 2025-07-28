@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet-async';
 import { 
-  ChartBarIcon, 
-  UsersIcon, 
-  TrendingUpIcon, 
-  ClockIcon,
+  ChartBarIcon,
+  CalendarIcon,
+  TrendingUpIcon,
+  TrendingDownIcon,
   EyeIcon,
-  StarIcon,
-  CurrencyDollarIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon
+  UserIcon,
+  DocumentTextIcon,
+  ClockIcon
 } from '@heroicons/react/24/outline';
 import { apiService } from '../services/apiService';
 import { useAuth } from '../context/AuthContext';
@@ -111,7 +109,7 @@ const AdminAnalytics = () => {
 
   const tabs = [
     { id: 'overview', name: 'Overview', icon: ChartBarIcon },
-    { id: 'users', name: 'User Analytics', icon: UsersIcon },
+    { id: 'users', name: 'User Analytics', icon: UserIcon },
     { id: 'content', name: 'Content Analytics', icon: EyeIcon },
     { id: 'performance', name: 'Performance', icon: TrendingUpIcon },
   ];
@@ -194,7 +192,7 @@ const AdminAnalytics = () => {
                     <div className="bg-white rounded-lg shadow p-6">
                       <div className="flex items-center">
                         <div className="p-2 bg-blue-100 rounded-lg">
-                          <UsersIcon className="w-6 h-6 text-blue-600" />
+                          <UserIcon className="w-6 h-6 text-blue-600" />
                         </div>
                         <div className="ml-4">
                           <p className="text-sm font-medium text-gray-600">Total Users</p>
@@ -220,7 +218,7 @@ const AdminAnalytics = () => {
                     <div className="bg-white rounded-lg shadow p-6">
                       <div className="flex items-center">
                         <div className="p-2 bg-purple-100 rounded-lg">
-                          <CurrencyDollarIcon className="w-6 h-6 text-purple-600" />
+                          <DocumentTextIcon className="w-6 h-6 text-purple-600" />
                         </div>
                         <div className="ml-4">
                           <p className="text-sm font-medium text-gray-600">Subscribers</p>
@@ -380,7 +378,7 @@ const AdminAnalytics = () => {
                     <div className="bg-white rounded-lg shadow p-6">
                       <div className="flex items-center">
                         <div className="p-2 bg-green-100 rounded-lg">
-                          <CheckCircleIcon className="w-6 h-6 text-green-600" />
+                          <DocumentTextIcon className="w-6 h-6 text-green-600" />
                         </div>
                         <div className="ml-4">
                           <p className="text-sm font-medium text-gray-600">Published</p>
@@ -404,7 +402,7 @@ const AdminAnalytics = () => {
                     <div className="bg-white rounded-lg shadow p-6">
                       <div className="flex items-center">
                         <div className="p-2 bg-purple-100 rounded-lg">
-                          <StarIcon className="w-6 h-6 text-purple-600" />
+                          <CalendarIcon className="w-6 h-6 text-purple-600" />
                         </div>
                         <div className="ml-4">
                           <p className="text-sm font-medium text-gray-600">Total Views</p>

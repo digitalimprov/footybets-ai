@@ -1,5 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet-async';
+import React, { useState } from 'react';
+import { 
+  PlusIcon,
+  SparklesIcon,
+  DocumentTextIcon,
+  ChartBarIcon,
+  TrophyIcon,
+  NewspaperIcon,
+  UserGroupIcon,
+  PlayIcon
+} from '@heroicons/react/24/outline';
 import { apiService } from '../services/apiService';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -7,54 +16,21 @@ import SEO from '../components/SEO';
 
 const AdminGenerateContent = () => {
   const { user } = useAuth();
-  const [templates, setTemplates] = useState([]);
-  const [games, setGames] = useState([]);
-  const [teams, setTeams] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [generating, setGenerating] = useState(false);
-  const [formData, setFormData] = useState({
-    title: '',
-    content_type: 'article',
-    template_name: '',
-    context: {},
-    is_premium: false,
-    is_featured: false,
-    tags: [],
-    categories: []
-  });
+  const [contentType, setContentType] = useState('article');
+  const [gameId, setGameId] = useState('');
+  const [teamId, setTeamId] = useState('');
+  const [season, setSeason] = useState('2024');
+  const [customPrompt, setCustomPrompt] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  useEffect(() => {
-    fetchTemplates();
-    fetchGames();
-    fetchTeams();
-  }, []);
-
-  const fetchTemplates = async () => {
-    try {
-      const response = await apiService.getContentTemplates();
-      setTemplates(response.data || []);
-    } catch (error) {
-      console.error('Error fetching templates:', error);
-    }
-  };
-
-  const fetchGames = async () => {
-    try {
-      const response = await apiService.getGames({ limit: 50 });
-      setGames(response.data || []);
-    } catch (error) {
-      console.error('Error fetching games:', error);
-    }
-  };
-
-  const fetchTeams = async () => {
-    try {
-      const response = await apiService.getTeams();
-      setTeams(response.data || []);
-    } catch (error) {
-      console.error('Error fetching teams:', error);
-    }
-  };
+  const contentTypes = [
+    { id: 'article', name: 'General Article', icon: DocumentTextIcon, description: 'Create a general AFL article' },
+    { id: 'game_analysis', name: 'Game Analysis', icon: ChartBarIcon, description: 'Analyze a specific game' },
+    { id: 'team_preview', name: 'Team Preview', icon: UserGroupIcon, description: 'Preview a team for the season' },
+    { id: 'brownlow', name: 'Brownlow Analysis', icon: TrophyIcon, description: 'Brownlow Medal analysis' },
+    { id: 'news', name: 'News Article', icon: NewspaperIcon, description: 'Current AFL news' },
+    { id: 'prediction', name: 'Prediction Article', icon: SparklesIcon, description: 'Game predictions' }
+  ];
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;

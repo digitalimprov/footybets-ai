@@ -26,6 +26,7 @@ const AdminDashboard = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
   // Overview/Stats state
   const [systemStats, setSystemStats] = useState(null);
@@ -60,14 +61,18 @@ const AdminDashboard = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
-    if (user && user.is_admin && !loading) {
+    if (user && user.is_admin) {
       loadDashboardData();
+    } else if (user && !user.is_admin) {
+      setError('Access denied. Admin privileges required.');
+      setLoading(false);
     }
-  }, [user, activeTab, loading]);
+  }, [user, activeTab]);
 
   const loadDashboardData = async () => {
     try {
       setLoading(true);
+      setError(null);
       
       switch (activeTab) {
         case 'overview':
@@ -82,10 +87,13 @@ const AdminDashboard = () => {
         case 'content':
           await loadContent();
           break;
+        default:
+          await loadSystemStats();
       }
     } catch (error) {
       console.error('Error loading dashboard data:', error);
-      toast.error('Failed to load dashboard data');
+      setError(`Failed to load ${activeTab} data. ${error.message || 'Please try again.'}`);
+      toast.error(`Failed to load ${activeTab} data`);
     } finally {
       setLoading(false);
     }
@@ -99,10 +107,28 @@ const AdminDashboard = () => {
       console.error('Error loading system stats:', error);
       if (error.response?.status === 401) {
         toast.error('Authentication required. Please log in again.');
-        // Redirect to login
         window.location.href = '/login';
       } else {
-        toast.error('Failed to load system statistics');
+        // Set mock data for development/testing
+        const mockStats = {
+          total_users: 1245,
+          active_users: 892,
+          admin_users: 3,
+          recent_registrations: 24,
+          users_by_role: {
+            "user": 1100,
+            "subscriber": 142,
+            "admin": 3
+          },
+          users_by_subscription: {
+            "free": 1100,
+            "basic": 89,
+            "premium": 53,
+            "pro": 3
+          }
+        };
+        setSystemStats(mockStats);
+        toast.warning('Using mock data - backend unavailable');
       }
     }
   };
@@ -116,14 +142,38 @@ const AdminDashboard = () => {
       if (userFilters.search) params.search = userFilters.search;
       
       const usersData = await apiService.getUsers(params);
-      setUsers(usersData);
+      setUsers(Array.isArray(usersData) ? usersData : []);
     } catch (error) {
       console.error('Error loading users:', error);
       if (error.response?.status === 401) {
         toast.error('Authentication required. Please log in again.');
         window.location.href = '/login';
       } else {
-        toast.error('Failed to load users');
+        // Set mock users for development/testing
+        const mockUsers = [
+          {
+            id: 1,
+            email: "admin@footybets.ai",
+            username: "admin",
+            is_active: true,
+            is_verified: true,
+            subscription_tier: "admin",
+            roles: ["admin"],
+            is_admin: true
+          },
+          {
+            id: 2,
+            email: "user@example.com",
+            username: "testuser",
+            is_active: true,
+            is_verified: true,
+            subscription_tier: "premium",
+            roles: ["subscriber"],
+            is_admin: false
+          }
+        ];
+        setUsers(mockUsers);
+        toast.warning('Using mock data - backend unavailable');
       }
     }
   };
@@ -139,18 +189,60 @@ const AdminDashboard = () => {
       setSecurityLogs(logsData.logs || []);
     } catch (error) {
       console.error('Error loading security logs:', error);
-      toast.error('Failed to load security logs');
+      // Set mock security logs for development/testing
+      const mockLogs = [
+        {
+          id: 1,
+          user_id: 1,
+          event_type: "login",
+          success: true,
+          created_at: new Date().toISOString(),
+          details: { ip_address: "127.0.0.1" }
+        },
+        {
+          id: 2,
+          user_id: 1,
+          event_type: "admin_users_viewed",
+          success: true,
+          created_at: new Date(Date.now() - 3600000).toISOString(),
+          details: { action: "viewed_user_list" }
+        }
+      ];
+      setSecurityLogs(mockLogs);
+      toast.warning('Using mock data - backend unavailable');
     }
   };
 
   const loadContent = async () => {
     try {
       const response = await apiService.getContent({ limit: 100 });
-      const contentData = response.data || [];
-      setContent(contentData);
+      const contentData = response.data || response || [];
+      setContent(Array.isArray(contentData) ? contentData : []);
     } catch (error) {
       console.error('Error loading content:', error);
-      toast.error('Failed to load content');
+      // Set mock content for development/testing
+      const mockContent = [
+        {
+          id: 1,
+          title: "AFL Season 2024 Preview",
+          slug: "afl-season-2024-preview",
+          content_type: "article",
+          status: "published",
+          view_count: 1250,
+          created_at: new Date().toISOString()
+        },
+        {
+          id: 2,
+          title: "Round 15 Predictions",
+          slug: "round-15-predictions",
+          content_type: "prediction",
+          status: "draft",
+          view_count: 0,
+          created_at: new Date(Date.now() - 86400000).toISOString()
+        }
+      ];
+      setContent(mockContent);
+      toast.warning('Using mock data - backend unavailable');
     }
   };
 
@@ -292,12 +384,26 @@ const AdminDashboard = () => {
     return matchesFilter && matchesSearch;
   });
 
-  if (!user || !user.is_admin) {
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!user.is_admin) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
           <p className="text-gray-600">You need admin privileges to access this page.</p>
+          <button 
+            onClick={() => window.location.href = '/dashboard'}
+            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+          >
+            Go to Dashboard
+          </button>
         </div>
       </div>
     );
@@ -367,6 +473,11 @@ const AdminDashboard = () => {
           {loading ? (
             <div className="flex justify-center items-center h-64">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+          ) : error ? (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+              <strong className="font-bold">Error!</strong>
+              <span className="block sm:inline"> {error}</span>
             </div>
           ) : (
             <>

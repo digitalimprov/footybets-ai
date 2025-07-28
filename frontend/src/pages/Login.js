@@ -9,7 +9,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, loginAsTestAdmin } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -47,6 +47,12 @@ const Login = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleTestAdminLogin = () => {
+    loginAsTestAdmin();
+    toast.success('Logged in as test admin');
+    navigate('/admin/dashboard');
   };
 
   return (
@@ -128,6 +134,19 @@ const Login = () => {
                   Forgot your password?
                 </Link>
               </p>
+              
+              {/* Temporary test admin login for development */}
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <button
+                  onClick={handleTestAdminLogin}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md text-sm"
+                >
+                  🧪 Test Admin Login (Development)
+                </button>
+                <p className="text-xs text-gray-500 mt-1">
+                  For testing admin dashboard functionality
+                </p>
+              </div>
             </div>
           </form>
         </div>

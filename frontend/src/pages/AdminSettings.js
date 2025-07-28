@@ -1,16 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet-async';
+import React, { useState } from 'react';
 import { 
-  CogIcon, 
-  ShieldCheckIcon, 
-  BellIcon, 
-  KeyIcon,
-  DatabaseIcon,
-  GlobeAltIcon,
-  UserGroupIcon,
-  ChartBarIcon
+  CogIcon,
+  ShieldCheckIcon,
+  ServerIcon,
+  BellIcon,
+  DatabaseIcon
 } from '@heroicons/react/24/outline';
-import { apiService } from '../services/apiService';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import SEO from '../components/SEO';
@@ -63,24 +58,24 @@ const AdminSettings = () => {
     model_version: 'v1.0'
   });
 
-  useEffect(() => {
-    if (user && user.is_admin) {
-      loadSettings();
-    }
-  }, [user]);
+  // useEffect(() => {
+  //   if (user && user.is_admin) {
+  //     loadSettings();
+  //   }
+  // }, [user]);
 
-  const loadSettings = async () => {
-    try {
-      setLoading(true);
-      // In a real app, you'd load these from the backend
-      // For now, we'll use default values
-    } catch (error) {
-      console.error('Error loading settings:', error);
-      toast.error('Failed to load settings');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const loadSettings = async () => {
+  //   try {
+  //     setLoading(true);
+  //     // In a real app, you'd load these from the backend
+  //     // For now, we'll use default values
+  //   } catch (error) {
+  //     console.error('Error loading settings:', error);
+  //     toast.error('Failed to load settings');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleGeneralSettingsChange = (key, value) => {
     setGeneralSettings(prev => ({
@@ -130,7 +125,7 @@ const AdminSettings = () => {
         // In a real app, you'd reset these via the backend
         await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
         toast.success(`${settingsType} settings reset to defaults!`);
-        loadSettings();
+        // loadSettings(); // This line was removed as per the edit hint
       } catch (error) {
         console.error('Error resetting settings:', error);
         toast.error('Failed to reset settings');
@@ -174,10 +169,10 @@ const AdminSettings = () => {
   const tabs = [
     { id: 'general', name: 'General', icon: CogIcon },
     { id: 'security', name: 'Security', icon: ShieldCheckIcon },
-    { id: 'content', name: 'Content', icon: UserGroupIcon },
-    { id: 'ai', name: 'AI Settings', icon: ChartBarIcon },
+    { id: 'content', name: 'Content', icon: ServerIcon },
+    { id: 'ai', name: 'AI Settings', icon: DatabaseIcon },
     { id: 'notifications', name: 'Notifications', icon: BellIcon },
-    { id: 'database', name: 'Database', icon: DatabaseIcon },
+    { id: 'database', name: 'Database', icon: ServerIcon },
   ];
 
   return (
