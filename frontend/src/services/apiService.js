@@ -8,9 +8,6 @@ if (process.env.NODE_ENV === 'production' && !API_BASE_URL.startsWith('https://'
   // If we're in production and the URL doesn't start with https, try to fix it
   if (API_BASE_URL.startsWith('http://')) {
     API_BASE_URL = API_BASE_URL.replace('http://', 'https://');
-  } else if (API_BASE_URL.includes('footybets-backend')) {
-    // If it's a footybets backend URL, use the custom domain
-    API_BASE_URL = 'https://api.footybets.ai';
   }
 }
 
