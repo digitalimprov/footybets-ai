@@ -86,6 +86,13 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = False
+        fields = {
+            'database_url': {'env': 'DATABASE_URL'},
+            'api_secret_key': {'env': 'API_SECRET_KEY'},
+            'secret_key': {'env': 'SECRET_KEY'},
+            'environment': {'env': 'ENVIRONMENT'},
+            'debug': {'env': 'DEBUG'}
+        }
 
     def model_post_init(self, __context) -> None:
         """Validate settings after initialization."""
