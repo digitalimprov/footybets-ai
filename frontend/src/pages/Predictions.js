@@ -23,7 +23,85 @@ const Predictions = () => {
       setPredictions(data);
     } catch (error) {
       console.error('Error loading predictions:', error);
-      toast.error('Failed to load predictions');
+      
+      // If backend is unavailable, use mock data
+      if (error.response?.status === 405 || error.response?.status === 500 || !error.response) {
+        const mockPredictions = [
+          {
+            id: 1,
+            game_id: 1,
+            home_team_name: "Richmond Tigers",
+            away_team_name: "Collingwood Magpies",
+            predicted_winner_name: "Richmond Tigers",
+            confidence_score: 78.5,
+            predicted_home_score: 95,
+            predicted_away_score: 82,
+            reasoning: "Richmond's home ground advantage and recent form suggest they're favored. Their midfield has been dominant in recent weeks, particularly around stoppages. Collingwood's injury list includes key defenders which could be exploited.",
+            factors_considered: ["Home ground advantage", "Recent form", "Head-to-head record", "Injury reports", "Weather conditions"],
+            recommended_bet: "Richmond 1-39 points",
+            bet_confidence: 72.0,
+            model_version: "AFL_Predictor_v2.1",
+            prediction_date: new Date().toISOString(),
+            is_correct: null
+          },
+          {
+            id: 2,
+            game_id: 2,
+            home_team_name: "Melbourne Demons",
+            away_team_name: "Brisbane Lions",
+            predicted_winner_name: "Melbourne Demons",
+            confidence_score: 82.3,
+            predicted_home_score: 103,
+            predicted_away_score: 78,
+            reasoning: "Melbourne's defensive structure has been exceptional this season, allowing the fewest points per game. Brisbane's away form has been inconsistent, particularly against top-4 teams.",
+            factors_considered: ["Defensive efficiency", "Away form", "Forward line effectiveness", "Ruck dominance"],
+            recommended_bet: "Melbourne 40+ points",
+            bet_confidence: 68.5,
+            model_version: "AFL_Predictor_v2.1",
+            prediction_date: new Date(Date.now() - 3600000).toISOString(),
+            is_correct: null
+          },
+          {
+            id: 3,
+            game_id: 3,
+            home_team_name: "Geelong Cats",
+            away_team_name: "Western Bulldogs",
+            predicted_winner_name: "Geelong Cats",
+            confidence_score: 71.2,
+            predicted_home_score: 89,
+            predicted_away_score: 85,
+            reasoning: "This is expected to be a close contest. Geelong's experience in big games gives them a slight edge, but the Bulldogs' pace could trouble them in transition.",
+            factors_considered: ["Experience in finals", "Transition game", "Contested possession rate", "Goal kicking accuracy"],
+            recommended_bet: "Under 174.5 total points",
+            bet_confidence: 65.0,
+            model_version: "AFL_Predictor_v2.1",
+            prediction_date: new Date(Date.now() - 7200000).toISOString(),
+            is_correct: null
+          },
+          {
+            id: 4,
+            game_id: 4,
+            home_team_name: "Port Adelaide Power",
+            away_team_name: "Sydney Swans",
+            predicted_winner_name: "Sydney Swans",
+            confidence_score: 69.8,
+            predicted_home_score: 78,
+            predicted_away_score: 91,
+            reasoning: "Sydney's improved defensive pressure and ball movement efficiency make them favorites despite playing away. Port Adelaide's inconsistent goal kicking could prove costly.",
+            factors_considered: ["Defensive pressure rating", "Ball movement efficiency", "Goal kicking accuracy", "Interstate travel"],
+            recommended_bet: "Sydney -15.5 points",
+            bet_confidence: 63.2,
+            model_version: "AFL_Predictor_v2.1",
+            prediction_date: new Date(Date.now() - 10800000).toISOString(),
+            is_correct: null
+          }
+        ];
+        
+        setPredictions(mockPredictions);
+        toast.warning('Backend unavailable - showing sample predictions for demonstration');
+      } else {
+        toast.error('Failed to load predictions');
+      }
     } finally {
       setLoading(false);
     }
@@ -38,7 +116,11 @@ const Predictions = () => {
       loadPredictions(); // Refresh the list
     } catch (error) {
       console.error('Error generating predictions:', error);
-      toast.error('Failed to generate predictions');
+      if (error.response?.status === 405 || error.response?.status === 500 || !error.response) {
+        toast.error('Prediction generation unavailable - backend not accessible');
+      } else {
+        toast.error('Failed to generate predictions');
+      }
     } finally {
       setGenerating(false);
     }
@@ -52,7 +134,11 @@ const Predictions = () => {
       loadPredictions(); // Refresh the list
     } catch (error) {
       console.error('Error updating accuracy:', error);
-      toast.error('Failed to update accuracy');
+      if (error.response?.status === 405 || error.response?.status === 500 || !error.response) {
+        toast.error('Accuracy update unavailable - backend not accessible');
+      } else {
+        toast.error('Failed to update accuracy');
+      }
     }
   };
 
