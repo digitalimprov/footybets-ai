@@ -5,10 +5,17 @@ let API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 // Force HTTPS in production and ensure correct backend URL
 if (process.env.NODE_ENV === 'production') {
-  // Use the correct Cloud Run backend URL
+  // Use the correct Cloud Run backend URL with HTTPS
   API_BASE_URL = 'https://footybets-backend-818397187963.us-central1.run.app';
-} else if (API_BASE_URL.startsWith('http://')) {
-  // In development, convert to HTTPS if needed
+} else {
+  // In development, ensure HTTPS
+  if (API_BASE_URL.startsWith('http://')) {
+    API_BASE_URL = API_BASE_URL.replace('http://', 'https://');
+  }
+}
+
+// Always ensure HTTPS for security
+if (!API_BASE_URL.startsWith('https://')) {
   API_BASE_URL = API_BASE_URL.replace('http://', 'https://');
 }
 
@@ -24,6 +31,11 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  // Force HTTPS and handle redirects properly
+  maxRedirects: 5,
+  validateStatus: function (status) {
+    return status >= 200 && status < 400; // Accept redirects
+  },
 });
 
 // Request interceptor
@@ -34,6 +46,13 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Ensure HTTPS for all requests
+    if (config.url && config.url.startsWith('http://')) {
+      config.url = config.url.replace('http://', 'https://');
+    }
+    
+    console.log('Making API request to:', config.baseURL + config.url);
     return config;
   },
   (error) => {
