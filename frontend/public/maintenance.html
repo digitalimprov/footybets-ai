@@ -31,6 +31,33 @@
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .admin-login-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        .admin-login-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .admin-login-btn::before {
+            content: "🔐 ";
         }
         
         .logo {
@@ -133,10 +160,24 @@
             text-decoration: underline;
         }
         
+        .admin-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
         @media (max-width: 768px) {
             .maintenance-container {
                 margin: 1rem;
                 padding: 1.5rem;
+            }
+            
+            .admin-login-btn {
+                position: static;
+                margin-bottom: 1rem;
+                display: inline-block;
             }
             
             .logo {
@@ -166,10 +207,36 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .status-indicator {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 215, 0, 0.2);
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            color: #ffeb3b;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            backdrop-filter: blur(5px);
+        }
+
+        .status-indicator::before {
+            content: "⚠️ ";
+        }
     </style>
 </head>
 <body>
+    <div class="status-indicator">
+        MAINTENANCE MODE
+    </div>
+
     <div class="maintenance-container">
+        <a href="#" onclick="showAdminLogin()" class="admin-login-btn">
+            Admin Access
+        </a>
+        
         <div class="logo">FootyBets.ai</div>
         <div class="subtitle">AI-Powered AFL Predictions</div>
         
@@ -203,9 +270,44 @@
             <p><strong>Need immediate assistance?</strong></p>
             <p>Follow us for updates: <a href="https://twitter.com/footybetsai" target="_blank">@FootyBetsAI</a></p>
             <p>Or check back in a few minutes!</p>
+            
+            <div class="admin-section">
+                <small>Administrators can <a href="#" onclick="showAdminLogin()" style="color: #ffeb3b;">access the system</a> during maintenance.</small>
+            </div>
         </div>
         
         <script>
+            function showAdminLogin() {
+                const password = prompt("Enter admin password:");
+                if (password === "admin123" || password === "footybets2024") {
+                    // Set maintenance bypass flag
+                    localStorage.setItem('maintenance_bypass', 'true');
+                    localStorage.setItem('maintenance_bypass_time', Date.now());
+                    alert("Admin access granted. Redirecting to dashboard...");
+                    window.location.href = "/?admin_bypass=true";
+                } else if (password !== null) {
+                    alert("Invalid password.");
+                }
+            }
+
+            // Check if user is already bypassed
+            function checkAdminBypass() {
+                const bypass = localStorage.getItem('maintenance_bypass');
+                const bypassTime = localStorage.getItem('maintenance_bypass_time');
+                const now = Date.now();
+                const oneHour = 60 * 60 * 1000;
+                
+                if (bypass === 'true' && bypassTime && (now - bypassTime < oneHour)) {
+                    // Still within bypass window
+                    return true;
+                }
+                
+                // Clear expired bypass
+                localStorage.removeItem('maintenance_bypass');
+                localStorage.removeItem('maintenance_bypass_time');
+                return false;
+            }
+
             // Auto-refresh every 2 minutes to check if maintenance is complete
             setTimeout(function() {
                 if (window.location.pathname === '/maintenance.html') {
@@ -236,6 +338,13 @@
                         window.location.href = '/';
                     }
                 }, 1000);
+            }
+            
+            // Check URL parameters for admin bypass
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('admin_bypass') === 'true') {
+                localStorage.setItem('maintenance_bypass', 'true');
+                localStorage.setItem('maintenance_bypass_time', Date.now());
             }
             
             updateETA();
