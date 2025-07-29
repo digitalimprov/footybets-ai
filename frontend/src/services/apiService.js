@@ -80,7 +80,7 @@ apiClient.interceptors.response.use(
     if (error.response?.status >= 500) {
       toast.error('Server error. Our Australian support team has been notified.');
       console.error('Server Error:', error.response);
-    }
+  }
     
     return Promise.reject(error);
   }
