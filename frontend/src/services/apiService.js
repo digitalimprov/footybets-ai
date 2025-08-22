@@ -185,6 +185,38 @@ const apiService = {
   // Health check for Australian infrastructure
   health: () => apiClient.get('/health'),
   
+  // Tips and AI predictions
+  tips: {
+    getFeatured: (limit = 5) => apiClient.get('/tips/featured', { params: { limit } }),
+    getWeekly: (weeks_ahead = 1) => apiClient.get('/tips/weekly', { params: { weeks_ahead } }),
+    getRound: (round_number, season) => apiClient.get(`/tips/round/${round_number}`, { params: { season } }),
+    getCurrentRound: () => apiClient.get('/tips/current-round'),
+    getUpcoming: (days_ahead = 7) => apiClient.get('/tips/upcoming', { params: { days_ahead } }),
+    getGameTip: (game_id) => apiClient.get(`/tips/game/${game_id}`),
+    getAccuracy: (days_back = 30) => apiClient.get('/tips/accuracy', { params: { days_back } }),
+    generate: () => apiClient.post('/tips/generate')
+  },
+
+  // Automation and scheduling
+  automation: {
+    // Scheduler management
+    getSchedulerStatus: () => apiClient.get('/automation/scheduler/status'),
+    startScheduler: () => apiClient.post('/automation/scheduler/start'),
+    stopScheduler: () => apiClient.post('/automation/scheduler/stop'),
+    runJob: (job_id) => apiClient.post(`/automation/scheduler/run-job/${job_id}`),
+    
+    // Scraping operations
+    scrapeUpcoming: (weeks_ahead = 2, save_to_db = true) => 
+      apiClient.get('/automation/scraping/upcoming', { params: { weeks_ahead, save_to_db } }),
+    scrapeResults: (weeks_back = 1, save_to_db = true) => 
+      apiClient.get('/automation/scraping/results', { params: { weeks_back, save_to_db } }),
+    updateAccuracy: () => apiClient.post('/automation/scraping/update-accuracy'),
+    getCurrentRound: () => apiClient.get('/automation/scraping/current-round'),
+    
+    // Full automation workflows
+    runFullWeeklyUpdate: () => apiClient.post('/automation/automation/full-weekly-update')
+  },
+
   // Region-specific utilities
   utils: {
     getAustralianTime: () => apiClient.get('/utils/time/australia'),

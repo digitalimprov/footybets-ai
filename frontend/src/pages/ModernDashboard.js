@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { apiService } from '../services/apiService';
+import apiService from '../services/apiService';
 import { 
   TrophyIcon, 
   ChartBarIcon, 
@@ -30,9 +30,9 @@ const ModernDashboard = () => {
       
       // Load featured tips, weekly tips, and accuracy stats in parallel
       const [featuredResponse, weeklyResponse, accuracyResponse] = await Promise.all([
-        apiService.get('/tips/featured?limit=3'),
-        apiService.get('/tips/weekly'),
-        apiService.get('/tips/accuracy?days_back=30')
+        apiService.tips.getFeatured(3),
+        apiService.tips.getWeekly(),
+        apiService.tips.getAccuracy(30)
       ]);
 
       setFeaturedTips(featuredResponse.data.featured_tips || []);

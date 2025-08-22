@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { apiService } from '../services/apiService';
+import apiService from '../services/apiService';
 import {
   CogIcon,
   PlayIcon,
@@ -28,7 +28,7 @@ const AdminAutomation = () => {
   const loadSchedulerStatus = async () => {
     try {
       setLoading(true);
-      const response = await apiService.get('/automation/scheduler/status');
+      const response = await apiService.automation.getSchedulerStatus();
       setSchedulerStatus(response.data);
     } catch (error) {
       console.error('Error loading scheduler status:', error);
@@ -41,7 +41,9 @@ const AdminAutomation = () => {
   const handleSchedulerAction = async (action) => {
     try {
       setOperationInProgress(action);
-      const response = await apiService.post(`/automation/scheduler/${action}`);
+      const response = action === 'start' ? 
+        await apiService.automation.startScheduler() : 
+        await apiService.automation.stopScheduler();
       
       if (response.data.success) {
         toast.success(response.data.message);
@@ -60,7 +62,7 @@ const AdminAutomation = () => {
   const runJobManually = async (jobId, jobName) => {
     try {
       setOperationInProgress(jobId);
-      const response = await apiService.post(`/automation/scheduler/run-job/${jobId}`);
+      const response = await apiService.automation.runJob(jobId);
       
       if (response.data.success) {
         toast.success(`${jobName} completed successfully`);
@@ -80,7 +82,7 @@ const AdminAutomation = () => {
       setOperationInProgress('full_update');
       toast.loading('Running full weekly update...', { id: 'full_update' });
       
-      const response = await apiService.post('/automation/automation/full-weekly-update');
+      const response = await apiService.automation.runFullWeeklyUpdate();
       
       if (response.data.success) {
         toast.success('Full weekly update completed successfully', { id: 'full_update' });
@@ -114,8 +116,9 @@ const AdminAutomation = () => {
       setOperationInProgress(type);
       toast.loading(`Running ${taskName}...`, { id: type });
       
-      const endpoint = type === 'upcoming' ? '/automation/scraping/upcoming' : '/automation/scraping/results';
-      const response = await apiService.get(endpoint);
+      const response = type === 'upcoming' ? 
+        await apiService.automation.scrapeUpcoming() : 
+        await apiService.automation.scrapeResults();
       
       if (response.data.success) {
         toast.success(`${taskName} completed: ${response.data.message}`, { id: type });
