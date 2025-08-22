@@ -6,7 +6,7 @@ from fastapi.exceptions import RequestValidationError
 import time
 import logging
 
-from app.api.routes import games, predictions, analytics, scraping, auth, admin, content
+from app.api.routes import games, predictions, analytics, scraping, auth, admin, content, automation, tips
 from app.api.routes import auth_simple
 from app.core.config import settings
 from app.core.security import SecurityMiddleware, log_security_event
@@ -215,8 +215,10 @@ app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
 app.include_router(auth_simple.router, prefix="/api/auth", tags=["authentication"])
 app.include_router(games.router, prefix="/api/games", tags=["games"])
 app.include_router(predictions.router, prefix="/api/predictions", tags=["predictions"])
+app.include_router(tips.router, prefix="/api/tips", tags=["tips"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
 app.include_router(scraping.router, prefix="/api/scraping", tags=["scraping"])
+app.include_router(automation.router, prefix="/api/automation", tags=["automation"])
 app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 app.include_router(content.router, prefix="/api/content", tags=["content"])
 
@@ -287,6 +289,14 @@ async def startup_event():
     logger.info(f"Debug mode: {settings.debug}")
     logger.info(f"Security headers enabled: {settings.enable_security_headers}")
     
+    # Start the automation scheduler
+    try:
+        from app.services.scheduler_service import scheduler_service
+        scheduler_service.start()
+        logger.info("Automation scheduler started successfully")
+    except Exception as e:
+        logger.error(f"Failed to start automation scheduler: {str(e)}")
+    
     # Log security configuration
     log_security_event("application_startup", None, {
         "environment": settings.environment,
@@ -302,4 +312,13 @@ async def startup_event():
 async def shutdown_event():
     """Application shutdown event."""
     logger.info("FootyBets.ai API shutting down...")
+    
+    # Stop the automation scheduler
+    try:
+        from app.services.scheduler_service import scheduler_service
+        scheduler_service.stop()
+        logger.info("Automation scheduler stopped successfully")
+    except Exception as e:
+        logger.error(f"Failed to stop automation scheduler: {str(e)}")
+    
     log_security_event("application_shutdown", None, {}) 

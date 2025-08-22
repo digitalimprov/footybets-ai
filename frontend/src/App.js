@@ -18,6 +18,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminGenerateContent from './pages/AdminGenerateContent';
 import AdminSettings from './pages/AdminSettings';
 import AdminAnalytics from './pages/AdminAnalytics';
+import ModernDashboard from './pages/ModernDashboard';
+import AdminAutomation from './pages/AdminAutomation';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
@@ -141,7 +143,8 @@ function App() {
               <Routes>
                 {/* Main pages */}
                 <Route path="/" element={<Home />} />
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/dashboard" element={<ModernDashboard />} />
+                <Route path="/dashboard/legacy" element={<Dashboard />} />
                 
                 {/* SEO-optimized tips and predictions */}
                 <Route path="/afl-betting-tips" element={<Tips />} />
@@ -229,6 +232,14 @@ function App() {
                   element={
                     <ProtectedRoute requireAdmin={true}>
                       <AdminAnalytics />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/automation" 
+                  element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <AdminAutomation />
                     </ProtectedRoute>
                   } 
                 />

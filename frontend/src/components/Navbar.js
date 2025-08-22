@@ -29,10 +29,11 @@ const Navbar = () => {
   // Add admin-only navigation items
   const adminNavigation = [
     { name: 'Admin Dashboard', href: '/admin/dashboard', icon: CogIcon },
+    { name: 'Automation', href: '/admin/automation', icon: CogIcon },
     { name: 'Admin Analytics', href: '/admin/analytics', icon: CogIcon },
     { name: 'Generate Content', href: '/admin/generate-content', icon: CogIcon },
     { name: 'Admin Settings', href: '/admin/settings', icon: CogIcon },
-    { name: 'Scraping', href: urlStructure.admin.scraping, icon: CogIcon },
+    { name: 'Manual Scraping', href: urlStructure.admin.scraping, icon: CogIcon },
   ];
 
   const isActive = (path) => location.pathname === path;
