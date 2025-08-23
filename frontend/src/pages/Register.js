@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { apiService } from '../services/apiService';
+import apiService from '../services/apiService';
 import toast from 'react-hot-toast';
 import SEO from '../components/SEO';
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PlayIcon, ArrowPathIcon, EyeIcon } from '@heroicons/react/24/outline';
-import { apiService } from '../services/apiService';
+import apiService from '../services/apiService';
 import toast from 'react-hot-toast';
 import SEO from '../components/SEO';
 import { format } from 'date-fns';

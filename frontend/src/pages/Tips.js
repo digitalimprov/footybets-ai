@@ -7,7 +7,7 @@ import {
   EyeIcon,
   TrophyIcon
 } from '@heroicons/react/24/outline';
-import { apiService } from '../services/apiService';
+import apiService from '../services/apiService';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import SEO from '../components/SEO';

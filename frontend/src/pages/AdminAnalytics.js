@@ -9,7 +9,7 @@ import {
   DocumentTextIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
-import { apiService } from '../services/apiService';
+import apiService from '../services/apiService';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import SEO from '../components/SEO';

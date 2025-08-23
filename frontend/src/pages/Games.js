@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CalendarIcon, ClockIcon, MapPinIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
-import { apiService } from '../services/apiService';
+import apiService from '../services/apiService';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import SEO from '../components/SEO';

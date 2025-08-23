@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { apiService } from '../services/apiService';
+import apiService from '../services/apiService';
 
 const Home = () => {
   const [recentWins, setRecentWins] = useState([]);
