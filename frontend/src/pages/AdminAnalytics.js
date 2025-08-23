@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   ChartBarIcon,
   CalendarIcon,
-  TrendingUpIcon,
+  ArrowTrendingUpIcon,
   TrendingDownIcon,
   EyeIcon,
   UserIcon,
@@ -111,7 +111,7 @@ const AdminAnalytics = () => {
     { id: 'overview', name: 'Overview', icon: ChartBarIcon },
     { id: 'users', name: 'User Analytics', icon: UserIcon },
     { id: 'content', name: 'Content Analytics', icon: EyeIcon },
-    { id: 'performance', name: 'Performance', icon: TrendingUpIcon },
+    { id: 'performance', name: 'Performance', icon: ArrowTrendingUpIcon },
   ];
 
   return (
@@ -205,7 +205,7 @@ const AdminAnalytics = () => {
                     <div className="bg-white rounded-lg shadow p-6">
                       <div className="flex items-center">
                         <div className="p-2 bg-green-100 rounded-lg">
-                          <TrendingUpIcon className="w-6 h-6 text-green-600" />
+                          <ArrowTrendingUpIcon className="w-6 h-6 text-green-600" />
                         </div>
                         <div className="ml-4">
                           <p className="text-sm font-medium text-gray-600">Active Users</p>
