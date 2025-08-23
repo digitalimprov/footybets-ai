@@ -4,7 +4,7 @@ import {
   ShieldCheckIcon,
   ServerIcon,
   BellIcon,
-  DatabaseIcon
+  CircleStackIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -170,7 +170,7 @@ const AdminSettings = () => {
     { id: 'general', name: 'General', icon: CogIcon },
     { id: 'security', name: 'Security', icon: ShieldCheckIcon },
     { id: 'content', name: 'Content', icon: ServerIcon },
-    { id: 'ai', name: 'AI Settings', icon: DatabaseIcon },
+    { id: 'ai', name: 'AI Settings', icon: CircleStackIcon },
     { id: 'notifications', name: 'Notifications', icon: BellIcon },
     { id: 'database', name: 'Database', icon: ServerIcon },
   ];

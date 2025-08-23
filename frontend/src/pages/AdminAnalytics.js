@@ -3,7 +3,7 @@ import {
   ChartBarIcon,
   CalendarIcon,
   ArrowTrendingUpIcon,
-  TrendingDownIcon,
+  ArrowTrendingDownIcon,
   EyeIcon,
   UserIcon,
   DocumentTextIcon,
