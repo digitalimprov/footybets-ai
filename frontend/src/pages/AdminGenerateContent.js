@@ -22,6 +22,38 @@ const AdminGenerateContent = () => {
   const [season, setSeason] = useState('2024');
   const [customPrompt, setCustomPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [templates] = useState([
+    { 
+      name: 'Game Preview Template', 
+      description: 'Preview upcoming AFL games with predictions',
+      content_type: 'game_preview' 
+    },
+    { 
+      name: 'Team Analysis Template', 
+      description: 'Analyze team performance and statistics',
+      content_type: 'team_analysis' 
+    },
+    { 
+      name: 'Player Profile Template', 
+      description: 'Create detailed player profiles',
+      content_type: 'player_profile' 
+    },
+    { 
+      name: 'Season Recap Template', 
+      description: 'Summarize season highlights',
+      content_type: 'season_recap' 
+    },
+    { 
+      name: 'Brownlow Prediction Template', 
+      description: 'Predict Brownlow Medal winners',
+      content_type: 'brownlow_prediction' 
+    },
+    { 
+      name: 'Trade Analysis Template', 
+      description: 'Analyze player trades and transfers',
+      content_type: 'trade_analysis' 
+    }
+  ]);
 
   const contentTypes = [
     { id: 'article', name: 'General Article', icon: DocumentTextIcon, description: 'Create a general AFL article' },
@@ -297,10 +329,10 @@ const AdminGenerateContent = () => {
 
                 <button
                   type="submit"
-                  disabled={generating}
+                  disabled={isGenerating}
                   className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2 px-4 rounded-md transition-colors"
                 >
-                  {generating ? 'Generating...' : 'Generate Content'}
+                  {isGenerating ? 'Generating...' : 'Generate Content'}
                 </button>
               </form>
             </div>
